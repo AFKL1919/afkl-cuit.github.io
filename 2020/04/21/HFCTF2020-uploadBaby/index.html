@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>HFCTF2020-uploadBaby | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言本题在BUUCTF上有复现环境这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HFCTF2020-uploadBaby">
+<meta property="og:url" content="http://yoursite.com/2020/04/21/HFCTF2020-uploadBaby/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="前言本题在BUUCTF上有复现环境这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-04-21T07:43:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.343Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-HFCTF2020-uploadBaby" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/21/HFCTF2020-uploadBaby/" class="article-date">
+  <time datetime="2020-04-21T07:43:00.000Z" itemprop="datePublished">2020-04-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      HFCTF2020-uploadBaby
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本题在BUUCTF上有复现环境<br>这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。  </p>
+<h1 id="php-session文件特性"><a href="#php-session文件特性" class="headerlink" title="php-session文件特性"></a>php-session文件特性</h1><h2 id="sess文件的储存方式"><a href="#sess文件的储存方式" class="headerlink" title="sess文件的储存方式"></a>sess文件的储存方式</h2><p>php中，session文件有三种储存方式。<br>1.php_binary<br>2.php(默认模式)<br>3.php_serialize<br>每种储存方式都不太相同：</p>
+<pre><code>&lt;?php
+//这里我设定2个内容
+$_SESSION[&apos;passwd&apos;] = &apos;233&apos;;
+$_SESSION[&apos;username&apos;] = &apos;guest&apos;;
+
+/*
+读取sess文件获得以下内容：
+php_binary模式：
+passwds:3:&quot;233&quot;;usernames:5:&quot;guest&quot;;
+(其中为键名的字符个数的ASCII，比如passwd由6个字母组成，则的HEX为06)
+
+php模式：
+passwd|s:3:&quot;233&quot;;username|s:5:&quot;guest&quot;;
+
+php_serialize模式：
+a:2:{s:6:&quot;passwd&quot;;s:3:&quot;233&quot;;s:8:&quot;username&quot;;s:5:&quot;guest&quot;;}
+*/</code></pre><h2 id="sess的启动"><a href="#sess的启动" class="headerlink" title="sess的启动"></a>sess的启动</h2><pre><code>&lt;?php
+session_start();
+$_SESSION[&apos;username&apos;] = &apos;guest&apos;;
+//上例在运行正常的情况下会给予用户一个Cookie——PHPSESSID
+//由26个小写字母和数字的hash值组成</code></pre><p>sess文件文件名由用户的一个Cookie——PHPSESSION决定。<br>一般情况下PHP由26个小写字母和数字的hash值组成，php会根据这个cookie来找到对应的sess文件，对SESSION进行读取。<br>php寻找对应sess文件的依据是sess文件的文件名，一个sess文件的文件名为sess_PHPSESSID。</p>
+<h2 id="sess在web漏洞中的应用"><a href="#sess在web漏洞中的应用" class="headerlink" title="sess在web漏洞中的应用"></a>sess在web漏洞中的应用</h2><p>往往session导致的漏洞是因为程序本身逻辑出现问题：</p>
+<ol>
+<li>session反序列化<br>很明显sess文件内容进行了序列化来储存数据。当我们可以控制session内容时(如开启了PHP_SESSION_UPLOAD_PROGRESS时…)</li>
+<li>任意session读取导致越权等<br>很明显用户可以自己修改PHPSESSID来进行任意SESSION文件的读取。本题就是这样，通过上传一个文件名为“sess”，内容是可以导致越权的序列化内容的文件，在通过hash_file后变为“sess_sha256”的文件。再改PHPSESSID为sha256即可导致越权。</li>
+</ol>
+<h1 id="hash-file"><a href="#hash-file" class="headerlink" title="hash_file()"></a>hash_file()</h1><p><code>string hash_file(string 加密方式, string 文件路径);</code><br>这个函数可以通过<strong>文件的内容</strong>产生一个hash值(不是文件名)<br>PS：这个函数对文件夹同样凑效<br>PSS：我在做这道CTF时以为其是对文件名进行hash处理，于是光荣的没做出来（</p>
+<h1 id="filter-input"><a href="#filter-input" class="headerlink" title="filter_input"></a>filter_input</h1><p><code>mixed filter_input(int 数据来源, string 变量名 [, int 过滤器]);</code><br>可以通过<code>filter_input(INPUT_POST, &#39;test&#39;);</code>的方式来接受一个变量名为test的POST数据。虽然通过<code>$_POST[&#39;test&#39;]</code>也可以接受POST参数，但上面的写法还可以在第三个参数的地方添加过滤器。</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>这道题的思路并不难，只是因为自己的基础不算太扎实导致没能解出…</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/04/21/HFCTF2020-uploadBaby/" data-id="ckbweck8p00038892avbc1s8x" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          网鼎杯2020-小知识点
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">C语言实现学生信息管理系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

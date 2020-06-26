@@ -5,17 +5,20 @@
   
 
   
-  <title>Hexo</title>
+  <title>AFKL&#39;s Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+  <meta name="description" content="一个菜鸡的blog">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AFKL&#39;s Blog">
 <meta property="og:url" content="http://yoursite.com/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="一个菜鸡的blog">
 <meta property="og:locale" content="en_US">
-<meta property="article:author" content="John Doe">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
 <meta name="twitter:card" content="summary">
   
-    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -36,7 +39,7 @@
   <div id="header-outer" class="outer">
     <div id="header-title" class="inner">
       <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
       </h1>
       
     </div>
@@ -64,10 +67,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-dozerCTF-Fake-phpminiadmin" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2020/06/26/hello-world/" class="article-date">
-  <time datetime="2020-06-26T15:12:56.691Z" itemprop="datePublished">2020-06-26</time>
+    <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/" class="article-date">
+  <time datetime="2020-06-16T16:33:00.000Z" itemprop="datePublished">2020-06-17</time>
 </a>
     
   </div>
@@ -78,7 +81,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2020/06/26/hello-world/">Hello World</a>
+      <a class="article-title" href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
     </h1>
   
 
@@ -86,24 +89,344 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
+        前言emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie
+        
+          <p class="article-more-link">
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2020/06/26/hello-world/" data-id="ckbwdgq3f0000ws92071lgdwq" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2020/06/17/dozerCTF-Fake-phpminiadmin/" data-id="ckbweck8r00058892dtcda48t" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-BJDCTF-3rd-小知识点" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" class="article-date">
+  <time datetime="2020-05-23T17:06:00.000Z" itemprop="datePublished">2020-05-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上...
+        
+          <p class="article-more-link">
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" data-id="ckbweck8h00008892eaa5byrb" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-网鼎杯2020-小知识点" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" class="article-date">
+  <time datetime="2020-05-11T14:58:00.000Z" itemprop="datePublished">2020-05-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        前言在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。
+        
+          <p class="article-more-link">
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" data-id="ckbweck8u000888923ksxgoo9" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-HFCTF2020-uploadBaby" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/04/21/HFCTF2020-uploadBaby/" class="article-date">
+  <time datetime="2020-04-21T07:43:00.000Z" itemprop="datePublished">2020-04-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        前言本题在BUUCTF上有复现环境这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。
+        
+          <p class="article-more-link">
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/04/21/HFCTF2020-uploadBaby/" data-id="ckbweck8p00038892avbc1s8x" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-C语言实现学生信息管理系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time datetime="2020-03-16T17:08:00.000Z" itemprop="datePublished">2020-03-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        前言由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西......
+        
+          <p class="article-more-link">
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" data-id="ckbweck8n000188923d131mmc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-FLASK学习笔记-WIP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" class="article-date">
+  <time datetime="2020-02-24T12:36:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/">FLASK学习笔记-WIP</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        flask学习笔记这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。
+        
+          <p class="article-more-link">
+            <a href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" data-id="ckbweck8o000288927ytk268y" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-SQL注入笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" class="article-date">
+  <time datetime="2020-02-24T12:31:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/">SQL注入笔记</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        SQL注入笔记这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！
+        
+          <p class="article-more-link">
+            <a href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" data-id="ckbweck8r00068892e69lg18z" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-不完整的Hgame2020-CTF的WP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/" class="article-date">
+  <time datetime="2020-02-24T12:08:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/">不完整的Hgame2020-CTF的WP</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        2020-杭电HgameWP2020年Hgame比赛WP由于我过于菜鸡，只能打到week2了...orz
+        
+          <p class="article-more-link">
+            <a href="/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/" data-id="ckbweck8s00078892432vg3uk" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Hello-World-0" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/Hello-World-0/" class="article-date">
+  <time datetime="2020-02-24T12:00:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/24/Hello-World-0/">Hello World!!!</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        您好！欢迎来到我的博客！
+        
+          <p class="article-more-link">
+            <a href="/2020/02/24/Hello-World-0/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/Hello-World-0/" data-id="ckbwefge4000988923cytgi6i" class="article-share-link">Share</a>
       
       
     </footer>
@@ -131,7 +454,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
     </div>
   </div>
 
@@ -144,7 +467,23 @@
       <ul>
         
           <li>
-            <a href="/2020/06/26/hello-world/">Hello World</a>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
           </li>
         
       </ul>
@@ -159,7 +498,7 @@
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2020 John Doe<br>
+      &copy; 2020 AFKL<br>
       Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>

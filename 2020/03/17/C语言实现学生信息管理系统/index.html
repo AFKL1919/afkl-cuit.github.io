@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>C语言实现学生信息管理系统 | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西......">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C语言实现学生信息管理系统">
+<meta property="og:url" content="http://yoursite.com/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="前言由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西......">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-03-16T17:08:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.356Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-C语言实现学生信息管理系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time datetime="2020-03-16T17:08:00.000Z" itemprop="datePublished">2020-03-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      C语言实现学生信息管理系统
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西……</p>
+<p>连带摸鱼耗费了4天的时间，共760行左右的代码，实现了链表节点的增删查改功能。由于还没有系统学习过C语言，所以许多东西都是自己摸索加查资料得来的。可能十分臃肿，欢迎批评斧正。<br>PS. 在大神们看来这可能不算什么，但我还是十分兴奋的(=v=)。</p>
+<h1 id="代码详情"><a href="#代码详情" class="headerlink" title="代码详情"></a>代码详情</h1><h2 id="main-c"><a href="#main-c" class="headerlink" title="main.c"></a>main.c</h2><pre><code>#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;string.h&gt;
+
+#include&quot;head.h&quot;
+
+newStudent *studentNext;
+
+int main(void)
+{
+    int modeCode;
+    initStudentList();
+    loadData(1);
+    while(1)
+    {
+        welcome();
+        printf(&quot;\nPlease select mode:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            addStudent();
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            selStudentMain();
+            break;
+        case 3:
+            system(&quot;cls&quot;);
+            delStudentMain();
+            break;
+        case 4:
+            system(&quot;cls&quot;);
+            changeStudentMain();
+            break;
+        case 5:
+            system(&quot;cls&quot;);
+            loadData(0);
+            break;
+        case 6:
+            system(&quot;cls&quot;);
+            updateData();
+            break;
+        case 0:
+            free(studentNext);
+            exit(0);
+        }
+    }
+}</code></pre><h2 id="head-h"><a href="#head-h" class="headerlink" title="head.h"></a>head.h</h2><pre><code>//当前加载学生数量
+int studentNumber = 0;
+
+//学生结构体
+typedef struct students
+{
+    char id[11];
+    char name[40];
+    char sex[7];
+    char age[4];
+    struct students *next;
+}newStudent;
+
+//全局链表
+extern newStudent *studentNext;
+
+//欢迎词
+void welcome();
+
+//链表初始化
+void initStudentList();
+
+//更新学生数据
+int updateData();
+
+//加载学生数据
+int loadData(int autoCode);
+
+//添加学生
+int addStudent();
+
+//删除学生主菜单
+int delStudentMain();
+//通过学号删除学生
+int delStudentById(char *id, int autoCode);
+//通过姓名删除学生
+int delStudentByName(char *name, int autoCode);
+//删除当前所有数据
+int delAllStudent();
+
+//搜索学生主菜单
+int selStudentMain();
+//通过学号搜索学生
+newStudent *selStudentById(char *id);
+//通过姓名搜索学生
+newStudent *selStudentByName(char *name);
+
+//展示所有学生
+int showStudent();
+
+//更改学生数据主菜单
+int changeStudentMain();
+//更改学生数据
+int changeStudent(newStudent *studentTmp);
+
+//欢迎词
+void welcome()
+{
+    system(&quot;cls&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=   _____    _____   __  __    _____   =\n&quot;);
+    printf(&quot;=  / ____|  / ____| |  \\/  |  / ____|  =\n&quot;);
+    printf(&quot;= | |      | (___   | \\  / | | (___    =\n&quot;);
+    printf(&quot;= | |       \\___ \\  | |\\/| |  \\___ \\   =\n&quot;);
+    printf(&quot;= | |____   ____) | | |  | |  ____) |  =\n&quot;);
+    printf(&quot;=  \\_____| |_____/  |_|  |_| |_____/   =\n&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=====CUIT Student Management System=====\n&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;============Student Number:%d============\n&quot;, studentNumber);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=============1.Add Student==============\n&quot;);
+    printf(&quot;=============2.Sel Student==============\n&quot;);
+    printf(&quot;=============3.Del Student==============\n&quot;);
+    printf(&quot;=============4.Cha Student==============\n&quot;);
+    printf(&quot;=============5.load   Data==============\n&quot;);
+    printf(&quot;=============6.update Data==============\n&quot;);
+    printf(&quot;=============0.Exit System==============\n&quot;);
+    printf(&quot;========================================\n&quot;);
+}
+
+//链表初始化
+void initStudentList()
+{
+    studentNext = (newStudent*)malloc(sizeof(newStudent));
+    studentNext-&gt;next = NULL;
+}
+
+//更新学生数据
+int updateData()
+{
+    FILE *fp = NULL;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        if(remove(&quot;studentInfo.txt&quot;) == 0)
+        {
+            fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+
+            studentTmp = studentNext-&gt;next;
+            if(fp != NULL)
+            {
+                while(studentTmp != NULL)
+                {
+                    fprintf(fp, &quot;|%s|%s|%s|%s|\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                    studentTmp = studentTmp-&gt;next;
+                }
+                fclose(fp);
+                printf(&quot;Updata completed\n&quot;);
+                delAllStudent();
+                loadData(1);
+            }
+            else
+                printf(&quot;File open fail\n&quot;);
+        }
+        else
+            printf(&quot;File delete fail\n&quot;);
+    }
+    else
+    {
+        fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+        if(fgetc(fp) != EOF)
+        {
+            fclose(fp);
+            remove(&quot;studentInfo.txt&quot;);
+            fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+            fclose(fp);
+        }
+        else
+            printf(&quot;The current data is empty!\n&quot;);
+    }
+    system(&quot;pause&quot;);
+    return 1;
+
+}
+
+//加载学生数据
+int loadData(int autoCode)
+{
+    FILE *fp = NULL;
+    char data[64] = {0};
+    char *str = NULL;
+    int i = 0;
+    int number = 0;
+    int judgeCode = 0;
+    newStudent *studentTmp = NULL;
+
+    fp = fopen(&quot;studentInfo.txt&quot;, &quot;r+b&quot;);
+
+    printf(&quot;Start load Data...\n&quot;);
+
+    while(fscanf(fp, &quot;%[^\n]%*c&quot;, data) != EOF)
+    {
+        studentTmp = (newStudent*)malloc(sizeof(newStudent));
+        str = strtok(data, &quot;|&quot;);
+        for(i = 0; i &lt; 4; i++)
+        {
+            if(str != NULL &amp;&amp; str != EOF &amp;&amp; str != &apos;\0&apos;)
+            {
+                switch(i)
+                {
+                case 0:
+                    if(selStudentById(str) == NULL)
+                    {
+                        strcpy(studentTmp-&gt;id, str);
+                        break;
+                    }
+                    else
+                    {
+                        judgeCode = 1;
+                        break;
+                    }
+                case 1:
+                    strcpy(studentTmp-&gt;name, str);
+                    break;
+                case 2:
+                    strcpy(studentTmp-&gt;sex, str);
+                    break;
+                case 3:
+                    strcpy(studentTmp-&gt;age, str);
+                    break;
+                }
+                if(judgeCode)
+                    break;
+                str = strtok(NULL, &quot;|&quot;);
+            }
+        }
+        if(!judgeCode)
+        {
+            studentTmp-&gt;next = studentNext-&gt;next;
+            studentNext-&gt;next = studentTmp;
+            studentNumber++;
+            number++;
+        }
+    }
+    printf(&quot;All done, loaded %d student...\n&quot;, number);
+    fclose(fp);
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//添加学生
+int addStudent()
+{
+    int sexCode = 0;        //性别状态码
+    int judgeCode = 0;
+    FILE *fp = NULL;        //文件变量
+    char continueCode = 1;   //判断是否继续添加
+    newStudent *studentSel = NULL;
+
+    while(1)
+    {
+        fp = fopen(&quot;studentInfo.txt&quot;, &quot;a&quot;);
+        //分配新内存
+        newStudent *studentTmp = (newStudent*)malloc(sizeof(newStudent));
+
+        printf(&quot;Please enter the id of the new student:&quot;);
+        scanf(&quot;%10[^\n]%*c&quot;, &amp;studentTmp-&gt;id);
+
+        if(studentNext-&gt;next != NULL)
+        {
+            studentSel = selStudentById(studentTmp-&gt;id);
+
+            if(studentSel != NULL)
+            {
+                printf(&quot;The same ID has been entered!\n&quot;);
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentSel-&gt;id, studentSel-&gt;name, studentSel-&gt;sex, studentSel-&gt;age);
+                printf(&quot;Would you like to update this student&apos;s information?[Yes(1)/No(0)]:&quot;);
+                scanf(&quot;%1d%*c&quot;, &amp;judgeCode);
+                if(judgeCode == 1)
+                    delStudentById(studentTmp-&gt;id, 1);
+                else
+                    return -1;
+            }
+        }
+
+        printf(&quot;Please enter the name of the new student:&quot;);
+        scanf(&quot;%39[^\n]&quot;, &amp;studentTmp-&gt;name);
+
+        while(1)
+        {
+            printf(&quot;Please choose the sex of the new student[Male(1)/Female(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;sexCode);
+            if(sexCode == 1)
+            {
+                strcpy(studentTmp-&gt;sex ,&quot;Male&quot;);
+                break;
+            }
+            else if(sexCode == 0)
+            {
+                strcpy(studentTmp-&gt;sex, &quot;Female&quot;);
+                break;
+            }
+            else
+                printf(&quot;Choose Error\n&quot;);
+        }
+
+        printf(&quot;Please enter the age of the new student:&quot;);
+        scanf(&quot;%3[^\n]%*c&quot;, &amp;studentTmp-&gt;age);
+
+        if(fp != NULL)
+        {
+            fprintf(fp, &quot;|%s|%s|%s|%s|\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            fclose(fp);
+        }else
+        {
+            printf(&quot;File open fail!\n&quot;);
+        }
+
+        studentTmp-&gt;next = studentNext-&gt;next;
+        studentNext-&gt;next = studentTmp;
+
+        studentNumber++;
+
+        while(continueCode)
+        {
+            printf(&quot;Do you want to continue adding students?[Yes(1)/No(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;continueCode);
+            if(continueCode)
+                system(&quot;cls&quot;);
+                break;
+        }
+
+        if(!continueCode)
+            break;
+    }
+    return 1;
+}
+
+//删除学生主菜单
+int delStudentMain()
+{
+    int modeCode = 0;
+    int judgeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to delete data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s id(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;&gt;Delete all student(3)\n&quot;);
+        printf(&quot;I choose to delete data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to delete:&quot;);
+            scanf(&quot;%10s%*c&quot;, &amp;id);
+            delStudentById(id, 0);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to delete:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            delStudentByName(name, 0);
+            modeCode = 1;
+            break;
+        case 3:
+            system(&quot;cls&quot;);
+            printf(&quot;Are you sure you want to delete all student data?[Yes(1)/No(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;judgeCode);
+            if(judgeCode)
+                delAllStudent();
+            modeCode = 1;
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return(modeCode);
+}
+
+//通过学号删除学生
+int delStudentById(char *id, int autoCode)
+{
+    int judgeCode = 1;
+    newStudent *studentDel = NULL;
+    newStudent *studentTmp = NULL;
+
+    studentTmp = studentNext;
+    studentDel = studentNext-&gt;next;
+    if(studentNext-&gt;next != NULL)
+    {
+        while(judgeCode)
+        {
+            judgeCode = strncmp(studentDel-&gt;id, id, 10);
+            if(!judgeCode)
+            {
+                printf(&quot;Removed student:%-11s%-20s%-7s%-4s\n&quot;, studentDel-&gt;id, studentDel-&gt;name, studentDel-&gt;sex, studentDel-&gt;age);
+                studentTmp-&gt;next = studentDel-&gt;next;
+                studentNumber--;
+                printf(&quot;successfully deleted\n&quot;);
+                break;
+            }
+            if(studentDel-&gt;next == NULL)
+            {
+                printf(&quot;No corresponding ID found!\n&quot;);
+                break;
+            }
+            studentTmp = studentDel;
+            studentDel = studentDel-&gt;next;
+        }
+        free(studentDel);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//通过姓名删除学生
+int delStudentByName(char *name, int autoCode)
+{
+    int judgeCode = 1;
+    newStudent *studentDel = NULL;
+    newStudent *studentTmp = NULL;
+
+    studentTmp = studentNext;
+    studentDel = studentNext-&gt;next;
+    if(studentNext-&gt;next != NULL)
+    {
+        while(judgeCode)
+        {
+            judgeCode = strcmp(studentDel-&gt;name, name);
+            if(!judgeCode)
+            {
+                printf(&quot;Removed student:%-11s%-20s%-7s%-4s\n&quot;, studentDel-&gt;id, studentDel-&gt;name, studentDel-&gt;sex, studentDel-&gt;age);
+                studentTmp-&gt;next = studentDel-&gt;next;
+                studentNumber--;
+                printf(&quot;successfully deleted\n&quot;);
+                break;
+            }
+            if(studentDel-&gt;next == NULL)
+            {
+                printf(&quot;No corresponding name found!\n&quot;);
+                break;
+            }
+            studentTmp = studentDel;
+            studentDel = studentDel-&gt;next;
+        }
+        free(studentDel);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//删除当前所有数据
+int delAllStudent()
+{
+    free(studentNext);
+    initStudentList();
+    studentNumber = 0;
+    return 1;
+}
+
+//搜索学生主菜单
+int selStudentMain()
+{
+    int modeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to select data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s ID(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;&gt;Show all student(3)\n&quot;);
+        printf(&quot;I choose to select data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to select:&quot;);
+            scanf(&quot;%10[^\n]%*c&quot;, &amp;id);
+            studentTmp = selStudentById(id);
+            if(studentTmp != NULL)
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to select:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            studentTmp = selStudentByName(name);
+            if(studentTmp != NULL)
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 3:
+            showStudent();
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return(modeCode);
+}
+
+//通过学号搜索学生
+newStudent *selStudentById(char *id)
+{
+    int judgeCode = 1;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentTmp = studentNext-&gt;next;
+        while(judgeCode)
+        {
+            judgeCode = strncmp(studentTmp-&gt;id, id, 10);
+            if(judgeCode)
+                studentTmp = studentTmp-&gt;next;
+            if(studentTmp == NULL)
+                judgeCode = 0;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    return studentTmp;
+}
+
+//通过姓名搜索学生
+newStudent *selStudentByName(char *name)
+{
+    int judgeCode = 1;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentTmp = studentNext-&gt;next;
+        while(judgeCode)
+        {
+            judgeCode = strcmp(studentTmp-&gt;name, name);
+            if(judgeCode)
+                studentTmp = studentTmp-&gt;next;
+            if(studentTmp == NULL)
+                judgeCode = 0;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    return studentTmp;
+}
+
+//展示所有学生
+int showStudent()
+{
+    newStudent *studentNow;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentNow = studentNext-&gt;next;
+        while(studentNow != NULL)
+        {
+            printf(&quot;%-11s%-20s%-7s%-4s\n&quot;, studentNow-&gt;id, studentNow-&gt;name, studentNow-&gt;sex, studentNow-&gt;age);
+            studentNow = studentNow-&gt;next;
+        }
+        printf(&quot;All done...\n&quot;);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    system(&quot;pause&quot;);
+    return 1;
+}
+
+//更改学生数据主菜单
+int changeStudentMain()
+{
+    int modeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to select data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s ID(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;I choose to select data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to select:&quot;);
+            scanf(&quot;%10[^\n]%*c&quot;, &amp;id);
+            studentTmp = selStudentById(id);
+            if(studentTmp != NULL)
+            {
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                changeStudent(studentTmp);
+            }
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to select:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            studentTmp = selStudentByName(name);
+            if(studentTmp != NULL)
+            {
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                changeStudent(studentTmp);
+            }
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+
+    return 1;
+}
+
+//更改学生数据
+int changeStudent(newStudent *studentTmp)
+{
+    int sexCode = 0;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;Please enter the id of the new student:&quot;);
+        scanf(&quot;%10[^\n]%*c&quot;, &amp;studentTmp-&gt;id);
+
+        printf(&quot;Please enter the name of the new student:&quot;);
+        scanf(&quot;%39[^\n]%*c&quot;, &amp;studentTmp-&gt;name);
+
+        while(1)
+        {
+            printf(&quot;Please choose the sex of the new student[Male(1)/Female(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;sexCode);
+            if(sexCode == 1)
+            {
+                strcpy(studentTmp-&gt;sex ,&quot;Male&quot;);
+                break;
+            }
+            else if(sexCode == 0)
+            {
+                strcpy(studentTmp-&gt;sex, &quot;Female&quot;);
+                break;
+            }
+            else
+                printf(&quot;Choose Error\n&quot;);
+        }
+
+        printf(&quot;Please enter the age of the new student:&quot;);
+        scanf(&quot;%3[^\n]%*c&quot;, &amp;studentTmp-&gt;age);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return 1;
+}</code></pre><h1 id="一些我想要说的点"><a href="#一些我想要说的点" class="headerlink" title="一些我想要说的点"></a>一些我想要说的点</h1><h2 id="scanf读取空格以及缓冲区对scanf的影响"><a href="#scanf读取空格以及缓冲区对scanf的影响" class="headerlink" title="scanf读取空格以及缓冲区对scanf的影响"></a>scanf读取空格以及缓冲区对scanf的影响</h2><p>最开始的时候，我希望通过：</p>
+<pre><code>char str_1[11] = {0};
+char str_2[11] = {0};
+
+scanf(&quot;%10s&quot;, &amp;str_1);
+scanf(&quot;%10s&quot;, &amp;str_2);</code></pre><p>的方式来获取字符串，但我发现上例是无法读取空格的。而且，第二个scanf函数被跳过了。</p>
+<p>关于第一个问题，稍微了解一点CTF知识的都知道，这里肯定不能使用<code>gets()</code>函数，因为他不安全。不过，我们可以使用<code>gets_s()</code>函数替换他。不过因为我喜欢搞事XD，所以我倔强地想要用<code>scanf()</code>函数（雾）；还有一方面，虽然我没有上过C语言课，但我觉得像<code>gets_s()</code>、<code>scanf_s()</code>这种函数应该不会讲的吧（，所以我打算用初学者的常用函数来实现。</p>
+<p>而第二个问题我则完全没有头绪…</p>
+<p>后来在一位师傅和搜集来的资料的帮助下。谜题，解开了。<br>师傅给我了一个这样的写法：</p>
+<pre><code>char str_1[11] = {0};
+char str_2[11] = {0};
+
+//这个是师傅给的写法
+//scanf(&quot;%[^\n]%*c&quot;, &amp;str_1);
+//scanf(&quot;%[^\n]%*c&quot;, &amp;str_2);
+
+//我改进了一下（
+scanf(&quot;%10[^\n]%*c&quot;, &amp;str_1);
+scanf(&quot;%10[^\n]%*c&quot;, &amp;str_2);</code></pre><p>详细资料：<a href="https://blog.csdn.net/q_l_s/article/details/22572777" target="_blank" rel="noopener">https://blog.csdn.net/q_l_s/article/details/22572777</a></p>
+<p>首先，第一个问题。采取<code>%10[^\n]%*c</code>的写法需要分开来讲：</p>
+<pre><code>{%10[^\n]}
+    {10}:读入10个字符
+    {[^\n}:读入回车符前(不含回车符)的所有字符
+{%*c}:忽略后面的字符</code></pre><p>可以查看上面的详细资料，资料就不展开了</p>
+<p>第二个问题的资料：<a href="https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713" target="_blank" rel="noopener">https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713</a><br>简单来说，就是前一个scanf把这次读取的回车符留在了缓冲区里，第二个scanf来读取缓冲区时便会读入这个回车导致第二个scanf被跳过。</p>
+<h2 id="整体架构-结构"><a href="#整体架构-结构" class="headerlink" title="整体架构(结构?)"></a>整体架构(结构?)</h2><p>由于我没有学过软件工程之类的课程，所以这里的用词可能不太准确。</p>
+<pre><code>|-主函数
+|----|-次函数-|-功能函数
+     |        |-功能函数
+     |          |...
+     |
+     |-次函数-|...
+    ...</code></pre><p>上面的结构打的有点混乱，简单来说就是每个功能有自己独立的主函数，由这个函数来调用功能函数。比如查询学生数据，有一个进行数据输入的主函数，然后将收集的信息加载到功能函数中。</p>
+<p>这次整体代码的架构很失败（PS. 最开始压根没有思考到架构这一码事，在慢慢码的过程中才发现架构很重要），有许多代码其实可以用函数封装重复使用。在早期还在一些功能上的函数里面加入了数据输入……下次需要注意。</p>
+<h2 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h2><p>emmmm总之就先这么多吧……以后来温故知新<br>PS. 估计以后不想看见这坨屎山（确信</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/" data-id="ckbweck8n000188923d131mmc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/04/21/HFCTF2020-uploadBaby/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          HFCTF2020-uploadBaby
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">FLASK学习笔记-WIP</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>

