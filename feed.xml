@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>AFKL&#39;s Blog</title>
+  
+  
+  <link href="/feed.xml" rel="self"/>
+  
+  <link href="https://afkl-cuit.github.io/"/>
+  <updated>2020-07-01T15:12:39.081Z</updated>
+  <id>https://afkl-cuit.github.io/</id>
+  
+  <author>
+    <name>AFKL</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>js的继承与原型链污染</title>
+    <link href="https://afkl-cuit.github.io/2020/07/01/js%E7%9A%84%E7%BB%A7%E6%89%BF%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/"/>
+    <id>https://afkl-cuit.github.io/2020/07/01/js%E7%9A%84%E7%BB%A7%E6%89%BF%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</id>
+    <published>2020-07-01T10:16:44.000Z</published>
+    <updated>2020-07-01T15:12:39.081Z</updated>
+    
+    <summary type="html">
+    
+      迷迷糊糊终于搞懂了js的面向对象（大概），这里简单记个笔记。
+    
+    </summary>
+    
+    
+    
+      <category term="javascipt" scheme="https://afkl-cuit.github.io/tags/javascipt/"/>
+    
+      <category term="对象" scheme="https://afkl-cuit.github.io/tags/%E5%AF%B9%E8%B1%A1/"/>
+    
+      <category term="继承" scheme="https://afkl-cuit.github.io/tags/%E7%BB%A7%E6%89%BF/"/>
+    
+      <category term="原型链污染" scheme="https://afkl-cuit.github.io/tags/%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>dozerCTF - Fake phpminiadmin</title>
+    <link href="https://afkl-cuit.github.io/2020/06/17/dozerCTF-Fake-phpminiadmin/"/>
+    <id>https://afkl-cuit.github.io/2020/06/17/dozerCTF-Fake-phpminiadmin/</id>
+    <published>2020-06-16T16:33:00.000Z</published>
+    <updated>2020-06-26T15:54:17.301Z</updated>
+    
+    <summary type="html">
+    
+      前言emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>BJDCTF 3rd-小知识点</title>
+    <link href="https://afkl-cuit.github.io/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/"/>
+    <id>https://afkl-cuit.github.io/2020/05/24/BJDCTF-3rd-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/</id>
+    <published>2020-05-23T17:06:00.000Z</published>
+    <updated>2020-06-26T15:54:17.320Z</updated>
+    
+    <summary type="html">
+    
+      今天也是被题目暴打的一回呢（，只出来两道题，有大量的时间浪费在了多人运动的注入上...
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>网鼎杯2020-小知识点</title>
+    <link href="https://afkl-cuit.github.io/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/"/>
+    <id>https://afkl-cuit.github.io/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/</id>
+    <published>2020-05-11T14:58:00.000Z</published>
+    <updated>2020-06-26T15:54:17.330Z</updated>
+    
+    <summary type="html">
+    
+      前言在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>HFCTF2020-uploadBaby</title>
+    <link href="https://afkl-cuit.github.io/2020/04/21/HFCTF2020-uploadBaby/"/>
+    <id>https://afkl-cuit.github.io/2020/04/21/HFCTF2020-uploadBaby/</id>
+    <published>2020-04-21T07:43:00.000Z</published>
+    <updated>2020-06-26T15:54:17.343Z</updated>
+    
+    <summary type="html">
+    
+      前言本题在BUUCTF上有复现环境这道CTF思路并不算难(虽然当时因为一些知识不太清晰没有做出来DX)，关键就是对于几个函数的理解和对php的session的存储方式。
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>C语言实现学生信息管理系统</title>
+    <link href="https://afkl-cuit.github.io/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/"/>
+    <id>https://afkl-cuit.github.io/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/</id>
+    <published>2020-03-16T17:08:00.000Z</published>
+    <updated>2020-06-26T15:54:17.356Z</updated>
+    
+    <summary type="html">
+    
+      前言由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西......
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>FLASK学习笔记-WIP</title>
+    <link href="https://afkl-cuit.github.io/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/"/>
+    <id>https://afkl-cuit.github.io/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/</id>
+    <published>2020-02-24T12:36:00.000Z</published>
+    <updated>2020-06-29T06:19:13.691Z</updated>
+    
+    <summary type="html">
+    
+      flask学习笔记这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>SQL注入笔记</title>
+    <link href="https://afkl-cuit.github.io/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/"/>
+    <id>https://afkl-cuit.github.io/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/</id>
+    <published>2020-02-24T12:31:00.000Z</published>
+    <updated>2020-06-26T15:54:17.373Z</updated>
+    
+    <summary type="html">
+    
+      SQL注入笔记这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>不完整的Hgame2020-CTF的WP</title>
+    <link href="https://afkl-cuit.github.io/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/"/>
+    <id>https://afkl-cuit.github.io/2020/02/24/%E4%B8%8D%E5%AE%8C%E6%95%B4%E7%9A%84Hgame2020-CTF%E7%9A%84WP/</id>
+    <published>2020-02-24T12:08:00.000Z</published>
+    <updated>2020-06-26T15:54:17.386Z</updated>
+    
+    <summary type="html">
+    
+      2020-杭电HgameWP2020年Hgame比赛WP由于我过于菜鸡，只能打到week2了...orz
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World!!!</title>
+    <link href="https://afkl-cuit.github.io/2020/02/24/Hello-World-0/"/>
+    <id>https://afkl-cuit.github.io/2020/02/24/Hello-World-0/</id>
+    <published>2020-02-24T12:00:00.000Z</published>
+    <updated>2020-06-26T15:54:17.395Z</updated>
+    
+    <summary type="html">
+    
+      您好！欢迎来到我的博客！
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+</feed>
