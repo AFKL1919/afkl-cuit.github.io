@@ -6,7 +6,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="https://afkl-cuit.github.io/"/>
-  <updated>2020-07-01T15:12:39.081Z</updated>
+  <updated>2020-07-08T18:46:22.070Z</updated>
   <id>https://afkl-cuit.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>记一次远程调试</title>
+    <link href="https://afkl-cuit.github.io/2020/07/09/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/"/>
+    <id>https://afkl-cuit.github.io/2020/07/09/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/</id>
+    <published>2020-07-08T16:47:56.000Z</published>
+    <updated>2020-07-08T18:46:22.070Z</updated>
+    
+    <summary type="html">
+    
+      docker for windows想build一个环境复现，结果build不起来，无奈使用vps上的docker for linux进行远程调试。
+    
+    </summary>
+    
+    
+    
+      <category term="debug" scheme="https://afkl-cuit.github.io/tags/debug/"/>
+    
+      <category term="php" scheme="https://afkl-cuit.github.io/tags/php/"/>
+    
+      <category term="ssh" scheme="https://afkl-cuit.github.io/tags/ssh/"/>
+    
+      <category term="docker" scheme="https://afkl-cuit.github.io/tags/docker/"/>
+    
+  </entry>
   
   <entry>
     <title>js的继承与原型链污染</title>
