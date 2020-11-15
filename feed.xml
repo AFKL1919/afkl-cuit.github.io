@@ -6,7 +6,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="https://afkl-cuit.github.io/"/>
-  <updated>2020-07-13T09:08:50.058Z</updated>
+  <updated>2020-11-15T04:03:18.550Z</updated>
   <id>https://afkl-cuit.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>php框架入门</title>
+    <link href="https://afkl-cuit.github.io/2020/11/15/php%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8/"/>
+    <id>https://afkl-cuit.github.io/2020/11/15/php%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8/</id>
+    <published>2020-11-15T04:00:48.000Z</published>
+    <updated>2020-11-15T04:03:18.550Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h1 id=&quot;php框架入门&quot;&gt;&lt;a href=&quot;#php框架入门&quot; class=&quot;headerlink&quot;
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="php" scheme="https://afkl-cuit.github.io/tags/php/"/>
+    
+      <category term="框架" scheme="https://afkl-cuit.github.io/tags/%E6%A1%86%E6%9E%B6/"/>
+    
+      <category term="代码审计" scheme="https://afkl-cuit.github.io/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+  </entry>
   
   <entry>
     <title>记一次远程调试</title>

