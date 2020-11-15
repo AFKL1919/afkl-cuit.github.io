@@ -1819,4 +1819,101 @@ php:5.6-apache:
         <tag>docker</tag>
       </tags>
   </entry>
+  <entry>
+    <title>如何挖掘自己的php反序列化链</title>
+    <url>/2020/11/15/%E5%A6%82%E4%BD%95%E6%8C%96%E6%8E%98%E8%87%AA%E5%B7%B1%E7%9A%84php%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE/</url>
+    <content><![CDATA[<p>本文先发于先知社区: <a href="https://xz.aliyun.com/t/8082">https://xz.aliyun.com/t/8082</a></p>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Q:<br>为什么要写这篇文章？</p>
+<p>A:<br>RCTF2020中的swoole一题刺激到我了（，那道题找了两天也找不到链。<br>再后来第五空间2020的那个laravel也是找了一天，最后还是靠phpggc做了次脚本小子。<br>我在想为啥我找不到链呢？故有此文。</p>
+<p>PS: 虽然写的是一些总结性的东西。但作者也不过找到5条框架的链而已，见识还是太少。希望师傅们多多包涵，加以指正。</p>
+<h1 id="简单介绍"><a href="#简单介绍" class="headerlink" title="简单介绍"></a>简单介绍</h1><p>在使用php的反序列化漏洞前需要两个条件</p>
+<ol>
+<li>可以进行反序列化的点</li>
+<li>合理的pop chain<br>这一对组合拳形成的反序列化漏洞可以进而造成RCE、文件读写、信息泄露等危害。</li>
+</ol>
+<p>本文不会对形成反序列化漏洞的点，进行讲解，其它大师傅已经讲解的十分详细了。<br>这里就我这两天的挖链经历进行一个总结。</p>
+<h1 id="总则"><a href="#总则" class="headerlink" title="总则"></a>总则</h1><p>我在挖链的途中总结出以下两点</p>
+<ol>
+<li>变量可控<br>在危险的函数和结构上的可控变量要尽可能的多</li>
+<li>扩大影响<br>尽可能的去寻找可以扩大攻击面的结构与方法</li>
+</ol>
+<p>我们接下来的pop chain构造便一直基于这两点</p>
+<h1 id="寻找起点"><a href="#寻找起点" class="headerlink" title="寻找起点"></a>寻找起点</h1><p>序列化是将对象的属性进行格式的转换，但不会包括方法。所以如果想要反序列化达成恶意的操作必须需要方法的执行。<br>对于起点来说，我们自然是要找到可以自动调用的方法。常见的可以自动调用的方法便是魔术方法。魔术方法的介绍有很多，这里就不详细介绍了。</p>
+<p>目前只有两个魔术方法可以被使用</p>
+<ol>
+<li><code>__destruct</code></li>
+<li><code>__wakeup</code></li>
+</ol>
+<p>其中，最为常用的魔术方法是<code>__destruct</code>，其特性是对象被销毁前被调用。从系统结构的角度讲，其最常见的场景是关闭某些功能。比如关闭文件流，更新数据等。但从反序列化的角度讲，其特殊的使用场景，代表在这个方法内可能会调用类内的其它方法。</p>
+<p>而另一个<code>__wakeup</code>方法就不太常用了，其特性是反序列化时进行调用。那么可以想象开发人员在对其进行编写时，可能会将其作为一个“进行反序列化时属性合法性校验的”方法。<br>最经典的就是<code>GuzzleHttp</code>包中的<code>GuzzleHttp\Psr7\FnStream</code>类，其内部存在大量变量可控的危险函数。但以下这一个方法就直接避免了这个方法被恶意使用。</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> \LogicException(<span class="string">'FnStream should never be unserialized'</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然也不是没有使用了<code>__wakeup</code>的链，只不过从各个方面来讲，<code>__destruct</code>确实更好用一些。</p>
+<p>接下来再看一个例子。<br>phpggc是github上的一个项目，其存储着大量反序列化链，可以说是反序列化的武器库。<br><a href="https://github.com/ambionics/phpggc">https://github.com/ambionics/phpggc</a><br>其存储了大量的laravel框架的RCE反序列化链，仔细观察发现一共6条反序列化链，5条都使用了同一个类作为起点，还有一条也间接调用了此类。其便是<code>PendingBroadcast.php</code>下的<code>__destruct</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;events-&gt;dispatch(<span class="keyword">$this</span>-&gt;event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>为什么这个方法会变成公交车呢？<br>我认为共3点</p>
+<ol>
+<li>可自动调用</li>
+<li>参数可控</li>
+<li>攻击面广<br>自动调用自然不必多说，<code>__destruct</code>方法嘛。但值得注意的是其参数，和结构。<br>我们可以看到<code>$this-&gt;events</code>和<code>$this-&gt;event</code>都是可控的，这意味着我们的链可以有两条走向。<br>其一是将<code>$this-&gt;events</code>赋值为没有<code>dispatch</code>方法的实例，来调用其<code>__call</code>方法。<br>其二是去调用各种类中<code>dispatch</code>方法，如果有的<code>dispatch</code>中有危险的函数或者结构，那就考虑使用它。<br>这样就大幅扩大了我们的攻击面。</li>
+</ol>
+<h1 id="跳板挑选"><a href="#跳板挑选" class="headerlink" title="跳板挑选"></a>跳板挑选</h1><p>所谓的跳板，就是在方法和方法、结构和结构、方法和结构之间的跳跃。</p>
+<p>常见的例子是一些字符串函数，例如<code>trim</code>，如果其参数可控，我们将其赋值为存在<code>__toString</code>方法的对象即可调用这个方法。</p>
+<p>还有类似于<code>call_user_func($this-&gt;test);</code>或者<code>$test();</code>这种只能调用没有参数的函数的结构。出来简单的调用phpinfo以外，我们也可以考虑将变量赋值为<code>[(new test), &quot;aaa&quot;]</code>这样的一个数组。就可以调用<code>test</code>类中的<code>aaa</code>公共方法。</p>
+<p>再者，就是<code>new $test1($test2, $test3);</code>这样的结构也可以调用<code>__construct</code>方法。或者像RCTF2020-swoole一题一样，新建一个PDO对象来进行mysql的load file。</p>
+<p>总之，就是不计一切代价扩大链的可能性，为寻找到可以利用的方法提供机会。</p>
+<h1 id="终点"><a href="#终点" class="headerlink" title="终点"></a>终点</h1><p>终点在我看来有两类</p>
+<ol>
+<li>危险动态调用</li>
+<li>危险函数</li>
+</ol>
+<p>动态调用就是像<code>($this-&gt;a)($this-&gt;b)</code>或者<code>$this-&gt;a[0]($this-&gt;b)</code>或者这样的危险动态调用。</p>
+<p>危险函数，就是根据目的寻找需要的函数。如要RCE，则寻找类似于<code>call_user_func</code>，<code>array_walk</code>这样的会进行函数调用的函数。如要FW，则寻找<code>file_put_content</code>这样的函数…</p>
+<h1 id="实战演练"><a href="#实战演练" class="headerlink" title="实战演练"></a>实战演练</h1><p>这里稍微讲一讲Yii2框架的链吧。当时搜了一波文章好像也没有。</p>
+<p>环境准备我就不详细写了</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">composer create-project yiisoft/yii2-app-basic app</span><br></pre></td></tr></table></figure>
+<p>composer+docker+vscode一把梭</p>
+<h2 id="Yii2-RCE1"><a href="#Yii2-RCE1" class="headerlink" title="Yii2/RCE1"></a>Yii2/RCE1</h2><p>首先全局搜索<code>__destruct</code>和<code>__wakeup</code>这两个魔术方法。可以使用grep命令<code>grep -A 10 -rn &quot;__destruct&quot;</code>。或者直接使用vscode的全局搜索也可。</p>
+<p>最后我将其定位在<code>yii\db\BatchQueryResult</code>类中的<code>__destruct</code></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;reset();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">reset</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;_dataReader !== <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;_dataReader-&gt;close();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_dataReader = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_batch = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_value = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">$this</span>-&gt;_key = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，就像我刚才说的一样，这里既可以调用<code>__call</code>方法，也可以调用<code>close</code>方法。</p>
+<p>在搜了一波<code>__call</code>方法感觉没戏后，这里我选择调用了<code>close</code>方法<br>全局搜<code>grep -A 10 -rn &quot;function[[:space:]]close&quot;</code>，或者vscode</p>
+<p>这里我选择了<code>yii\web\DbSession</code>类中的<code>close</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">close</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;getIsActive()) &#123;</span><br><span class="line">        <span class="comment">// prepare writeCallback fields before session closes</span></span><br><span class="line">        <span class="keyword">$this</span>-&gt;fields = <span class="keyword">$this</span>-&gt;composeFields();</span><br><span class="line">        YII_DEBUG ? session_write_close() : @session_write_close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先调用了父类的<code>getIsActive</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getIsActive</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> session_status() === PHP_SESSION_ACTIVE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到其对会话的状态进行了一个判别。这里我意外发现，只有当Yii的debug和gii这两个默认扩展都存在（不一定要开启）时，这里返回true。否则返回false。这里我还不知道为什么，希望有师傅可以解答…</p>
+<p>这里算是这条链唯一的缺憾了吧…<br>总之返回true后继续调用了接口类<code>yii\web\MultiFieldSession</code>的<code>composeFields</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">composeFields</span><span class="params">($id = null, $data = null)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $fields = <span class="keyword">$this</span>-&gt;writeCallback ? call_user_func(<span class="keyword">$this</span>-&gt;writeCallback, <span class="keyword">$this</span>) : [];</span><br><span class="line">    <span class="keyword">if</span> ($id !== <span class="keyword">null</span>) &#123;</span><br><span class="line">        $fields[<span class="string">'id'</span>] = $id;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ($data !== <span class="keyword">null</span>) &#123;</span><br><span class="line">        $fields[<span class="string">'data'</span>] = $data;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> $fields;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>芜湖，发现了个可控的<code>call_user_func</code>，但可惜参数无法控制，传入一个对象为参数的可用函数也不太多。那就像我刚才所说，赋值为<code>[(new test), &quot;aaa&quot;]</code>这样的一个数组。就可以调用<code>test</code>类中的<code>aaa</code>公共方法。</p>
+<p>那么有没有这样的公共方法？<br><code>grep -A 10 -rn &quot;public[[:space:]]function[[:space:]].*\(\)&quot;</code><br>最后我找到了<code>yii\rest\IndexAction</code>中的<code>run</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">run</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;checkAccess) &#123;</span><br><span class="line">        call_user_func(<span class="keyword">$this</span>-&gt;checkAccess, <span class="keyword">$this</span>-&gt;id);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;prepareDataProvider();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这下两个都可控了。</p>
+<p>调用栈</p>
+<h2 id="Yii2-RCE2"><a href="#Yii2-RCE2" class="headerlink" title="Yii2/RCE2"></a>Yii2/RCE2</h2><p>因为上一条链受扩展影响，所以打算再找一条<br>这次我定位到<code>\Symfony\Component\String\UnicodeString</code>的<code>__wakeup</code>类</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    normalizer_is_normalized(<span class="keyword">$this</span>-&gt;string) ?: <span class="keyword">$this</span>-&gt;string = normalizer_normalize(<span class="keyword">$this</span>-&gt;string);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我看了一下<code>normalizer_is_normalized</code>这个函数，其要求参数是字符串。参数又可控，那就调用<code>__toString</code>方法吧。</p>
+<p>最后我找到了<code>\Symfony\Component\String\LazyString</code>的<code>__toString</code>方法</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__toString</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (\is_string(<span class="keyword">$this</span>-&gt;value)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;value;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;value = (<span class="keyword">$this</span>-&gt;value)();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (\Throwable $e) &#123;</span><br><span class="line">        <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>啊这…结合最后一部分一打不就完事了？<br>喜加一</p>
+<p>调用栈</p>
+<h1 id="防御策略"><a href="#防御策略" class="headerlink" title="防御策略"></a>防御策略</h1><h2 id="动态调用与危险函数"><a href="#动态调用与危险函数" class="headerlink" title="动态调用与危险函数"></a>动态调用与危险函数</h2><ol>
+<li>在写到动态调用和危险函数时，务必对变量和方法进行回溯。查看变量是否是可控的。</li>
+<li>在容许的情况下，使用静态属性进行动态调用可以防止可控变量调用危险函数。</li>
+<li>在调用<code>$this-&gt;aaa-&gt;bbb()</code>这样类似的结构前可以利用<code>instanceof</code>进行检查，查看其是否是期望调用的类。</li>
+</ol>
+<h2 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h2><ol>
+<li>注意尽量少的在魔法方法中写入可以调用大量其它方法的方法。尤其是<code>__destruct</code>和<code>__wakeup</code>。</li>
+<li>注意在公共且不需要参数的方法中不要直接调用危险函数和动态调用。</li>
+<li>在不需要<code>__wakeup</code>方法且类没必要序列化时，可以考虑使用<code>__wakeup</code>阻止反序列化。</li>
+</ol>
+<h2 id="最最最最最重要的"><a href="#最最最最最重要的" class="headerlink" title="最最最最最重要的"></a>最最最最最重要的</h2><p>不要让unserialize和文件类函数用户可控！！！<br>不要让unserialize和文件类函数用户可控！！！<br>不要让unserialize和文件类函数用户可控！！！</p>
+<h1 id="后言"><a href="#后言" class="headerlink" title="后言"></a>后言</h1><p>emmm<del>感觉写了一篇水文</del><br>那就这样，这里放上我fork的phpggc，有想学习上面几条链的师傅可以看看<br><a href="https://github.com/AFKL-CUIT/phpggc">https://github.com/AFKL-CUIT/phpggc</a><br>如有错误还请指出！</p>
+]]></content>
+      <tags>
+        <tag>php</tag>
+        <tag>代码审计</tag>
+        <tag>反序列化</tag>
+      </tags>
+  </entry>
 </search>
