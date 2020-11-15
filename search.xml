@@ -1053,13 +1053,13 @@ $_SESSION[&apos;username&apos;] = &apos;guest&apos;;
 <li>框架的类加载机制</li>
 </ol>
 <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这是我于2020.11.8的例会分享内容，如有错误还请指正！</p>
-<h1 id="先从文件和文件夹讲起"><a href="#先从文件和文件夹讲起" class="headerlink" title="先从文件和文件夹讲起"></a>先从文件和文件夹讲起</h1><p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8sFx" alt="thinkphp"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi86fK" alt="laravel"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8BwR" alt="yii2"></p>
+<h1 id="先从文件和文件夹讲起"><a href="#先从文件和文件夹讲起" class="headerlink" title="先从文件和文件夹讲起"></a>先从文件和文件夹讲起</h1><p><a href="https://imgchr.com/i/Di8sFx"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8sFx.png" alt="Di8sFx.png"></a></p>
+<p><a href="https://imgchr.com/i/Di86fK"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi86fK.png" alt="Di86fK.png"></a></p>
+<p><a href="https://imgchr.com/i/Di8BwR"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8BwR.png" alt="Di8BwR.png"></a></p>
 <h2 id="public-web目录"><a href="#public-web目录" class="headerlink" title="public/web目录"></a>public/web目录</h2><p>我们先康康不同框架中，public/web文件夹里面有什么东西。</p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8gSO" alt="thinkphp-public"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8DT1" alt="laravel-public"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8WOH" alt="yii-web"></p>
+<p><a href="https://imgchr.com/i/Di8gSO"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8gSO.png" alt="Di8gSO.png"></a></p>
+<p><a href="https://imgchr.com/i/Di8DT1"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8DT1.png" alt="Di8DT1.png"></a></p>
+<p><a href="https://imgchr.com/i/Di8WOH"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8WOH.png" alt="Di8WOH.png"></a></p>
 <p>可以看道三个文件夹共有的特征便是——都拥有<code>index.php</code>文件。文件内容都大致如以下伪代码。</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">define(&quot;...&quot;, &quot;...&quot;);</span><br><span class="line">&#x2F;&#x2F;...  &#x2F;&#x2F; 定义了一些常量，例如yii是定义其debug是否开启等...</span><br><span class="line"></span><br><span class="line">require __DIR__.&#39;&#x2F;..&#x2F;vendor&#x2F;autoload.php&#39;;</span><br><span class="line">&#x2F;&#x2F; 导入autoload.php来自动加载类，这个之后在讲</span><br><span class="line"></span><br><span class="line">$config &#x3D; require &#39;..&#x2F;config&#x2F;config.php&#39;;</span><br><span class="line">require ...;</span><br><span class="line">&#x2F;&#x2F; 导入一些其它文件，比如config，引导文件等...</span><br><span class="line"></span><br><span class="line">(new app($config))-&gt;run();</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">$http &#x3D; (new App())-&gt;http;</span><br><span class="line">$response &#x3D; $http-&gt;run();</span><br><span class="line">$response-&gt;send();</span><br><span class="line">$http-&gt;end($response);</span><br><span class="line">&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;&#x3D;</span><br><span class="line">...</span><br><span class="line">&#x2F;&#x2F; 启动框架</span><br></pre></td></tr></table></figure>
 
@@ -1077,9 +1077,8 @@ $_SESSION[&apos;username&apos;] = &apos;guest&apos;;
 <p>对于其它的public/web下的其它文件，就说一下yii2下的<code>web/assets</code>文件夹吧。根据官网文档，这个文件夹的作用是如下：</p>
 <p>如果资源包放在 Web 不能访问的目录， 当视图注册资源时资源会被拷贝到一个 Web 可访问的目录中， 这个过程称为<em>资源发布</em>。资源包即为那些<code>css/js</code>文件。php将会在assets创建一个资源包文件的链接。</p>
 <p>这个功能是默认开启的，但当<code>assets</code>没有www-data的写权限时，<code>yii</code>会爆出无法写入文件的错误，解决途径有两个，一是关闭资源发布，二是给其写权限。如果是没有经验的运维，会老老实实根据<code>yii</code>爆出的错误，给予该文件夹写权限。那么如果有任意目录的文件上传，你知道该上传到哪里了吧？</p>
-<h2 id="vendor目录"><a href="#vendor目录" class="headerlink" title="vendor目录"></a>vendor目录</h2><p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi82lD" alt="thinkphp-vendor"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8yY6" alt="laravel-vendor"></p>
-<p><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8R6e" alt="yii-vendor"></p>
+<h2 id="vendor目录"><a href="#vendor目录" class="headerlink" title="vendor目录"></a>vendor目录</h2><p><a href="https://imgchr.com/i/Di82lD"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi82lD.png" alt="Di82lD.png"></a><a href="https://imgchr.com/i/Di8yY6"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8yY6.png" alt="Di8yY6.png"></a></p>
+<p><a href="https://imgchr.com/i/Di8R6e"><img src="E:%5Cblog%5Cblog-githubPage%5Cblog%5Csource_posts%5CDi8R6e.png" alt="Di8R6e.png"></a></p>
 <p>这个目录里装载了一个框架所需的依赖包，如果开发需要一些包作为辅助时，也会安装到这个文件夹。</p>
 <p>这里不得不谈的是php的类加载机制。</p>
 <h3 id="autoload-php文件"><a href="#autoload-php文件" class="headerlink" title="autoload.php文件"></a>autoload.php文件</h3><p>在入口文件中，我们看到，其导入了<code>vendor/autoload.php</code>文件，而其又导入了<code>composer/autoload_real.php</code>文件。我们来看看<code>autoload_real.php</code></p>
