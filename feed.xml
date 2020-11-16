@@ -6,7 +6,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="https://afkl-cuit.github.io/"/>
-  <updated>2020-11-15T07:26:50.891Z</updated>
+  <updated>2020-11-16T17:07:09.659Z</updated>
   <id>https://afkl-cuit.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>java注解学习</title>
+    <link href="https://afkl-cuit.github.io/2020/11/17/java%E6%B3%A8%E8%A7%A3%E5%AD%A6%E4%B9%A0/"/>
+    <id>https://afkl-cuit.github.io/2020/11/17/java%E6%B3%A8%E8%A7%A3%E5%AD%A6%E4%B9%A0/</id>
+    <published>2020-11-16T17:05:02.000Z</published>
+    <updated>2020-11-16T17:07:09.659Z</updated>
+    
+    <summary type="html">
+    
+      笔者在尝试学习java的异步时，发现对注解的认识还不够深，故有此文
+    
+    </summary>
+    
+    
+    
+      <category term="代码审计" scheme="https://afkl-cuit.github.io/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+      <category term="java" scheme="https://afkl-cuit.github.io/tags/java/"/>
+    
+      <category term="开发" scheme="https://afkl-cuit.github.io/tags/%E5%BC%80%E5%8F%91/"/>
+    
+      <category term="基础" scheme="https://afkl-cuit.github.io/tags/%E5%9F%BA%E7%A1%80/"/>
+    
+      <category term="注解" scheme="https://afkl-cuit.github.io/tags/%E6%B3%A8%E8%A7%A3/"/>
+    
+  </entry>
   
   <entry>
     <title>如何挖掘自己的php反序列化链</title>

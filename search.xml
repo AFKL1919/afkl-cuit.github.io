@@ -1916,4 +1916,124 @@ php:5.6-apache:
         <tag>反序列化</tag>
       </tags>
   </entry>
+  <entry>
+    <title>java注解学习</title>
+    <url>/2020/11/17/java%E6%B3%A8%E8%A7%A3%E5%AD%A6%E4%B9%A0/</url>
+    <content><![CDATA[<h1 id="java注解"><a href="#java注解" class="headerlink" title="java注解"></a>java注解</h1><h1 id="注解的定义和使用"><a href="#注解的定义和使用" class="headerlink" title="注解的定义和使用"></a>注解的定义和使用</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyTest &#123;</span><br><span class="line">	String[] value();</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">id</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和接口一样的定义，但前面多了一个<code>@</code></p>
+<p>使用方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@MyTest</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="元注解"><a href="#元注解" class="headerlink" title="元注解"></a>元注解</h1><p>字面意思，即<strong>最基本的注解</strong>。它可以用在其它注解上。<br>元注解有5种</p>
+<h2 id="Retention-保留期"><a href="#Retention-保留期" class="headerlink" title="@Retention 保留期"></a>@Retention 保留期</h2><p>作用: 其作用是告诉编译器和JVM被注解的注解的存活期</p>
+<table>
+<thead>
+<tr>
+<th align="left">取值</th>
+<th align="left">存活期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">RetentionPolicy.SOURCE</td>
+<td align="left">只在源码阶段，编译时丢弃</td>
+</tr>
+<tr>
+<td align="left">RetentionPolicy.CLASS</td>
+<td align="left">编译时保留，但不加载入JVM</td>
+</tr>
+<tr>
+<td align="left">RetentionPolicy.RUNTIME</td>
+<td align="left">编译时保留，加载入JVM，可以获取</td>
+</tr>
+</tbody></table>
+<h2 id="Documented-文档"><a href="#Documented-文档" class="headerlink" title="@Documented 文档"></a>@Documented 文档</h2><p>作用: 它的作用是能够将注解中的元素包含到 Javadoc 中去</p>
+<h2 id="Target-限定注解对象"><a href="#Target-限定注解对象" class="headerlink" title="@Target 限定注解对象"></a>@Target 限定注解对象</h2><p>作用: 限定注解的对象</p>
+<table>
+<thead>
+<tr>
+<th align="left">取值</th>
+<th align="left">对象</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ElementType.ANNOTATION_TYPE</td>
+<td align="left">可以给一个注解进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.CONSTRUCTOR</td>
+<td align="left">可以给构造方法进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.FIELD</td>
+<td align="left">可以给属性进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.LOCAL_VARIABLE</td>
+<td align="left">可以给局部变量进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.METHOD</td>
+<td align="left">可以给方法进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.PACKAGE</td>
+<td align="left">可以给一个包进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.PARAMETER</td>
+<td align="left">可以给一个方法内的参数进行注解</td>
+</tr>
+<tr>
+<td align="left">ElementType.TYPE</td>
+<td align="left">可以给一个类型进行注解，比如类、接口、枚举</td>
+</tr>
+</tbody></table>
+<h2 id="Inherited-使注解可以随类继承"><a href="#Inherited-使注解可以随类继承" class="headerlink" title="@Inherited 使注解可以随类继承"></a>@Inherited 使注解可以随类继承</h2><p>作用: 使注解可以随类继承</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.annotation.Inherited;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyAnnotation &#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@MyAnnotation</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test2</span> <span class="keyword">extends</span> <span class="title">test</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上例中，<code>test2</code>类也有和<code>test</code>类一样的<code>MyAnnotation</code>注解</p>
+<h2 id="Repeatable-重复使用"><a href="#Repeatable-重复使用" class="headerlink" title="@Repeatable 重复使用"></a>@Repeatable 重复使用</h2><p>作用: 对同一类多次打一个注解</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.annotation.Inherited;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Repeatable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyAnnotation &#123;</span><br><span class="line">    role[] value();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@Repeatable</span>(MyAnnotation<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">interface</span> <span class="title">role</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">value</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@role</span>(<span class="string">"富豪"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">father</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@role</span>(<span class="string">"画家"</span>)</span><br><span class="line"><span class="meta">@role</span>(<span class="string">"富二代"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">son</span> <span class="keyword">extends</span> <span class="title">father</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="java内置注解"><a href="#java内置注解" class="headerlink" title="java内置注解"></a>java内置注解</h1><h2 id="Deprecated-已抛弃"><a href="#Deprecated-已抛弃" class="headerlink" title="@Deprecated 已抛弃"></a>@Deprecated 已抛弃</h2><p>标记过时的类、属性、方法等</p>
+<p><img src="https://i.loli.net/2020/11/16/jdz1QFoKHNEhW4m.png" alt=""></p>
+<p>在ide里面，会有删除线表示过时方法</p>
+<h2 id="Override-重写"><a href="#Override-重写" class="headerlink" title="@Override 重写"></a>@Override 重写</h2><p>不多说了</p>
+<h2 id="SuppressWarnings-阻止警告"><a href="#SuppressWarnings-阻止警告" class="headerlink" title="@SuppressWarnings 阻止警告"></a>@SuppressWarnings 阻止警告</h2><p><img src="https://i.loli.net/2020/11/16/qdfnWviBk3te7Mh.png" alt=""></p>
+<h2 id="SafeVarargs"><a href="#SafeVarargs" class="headerlink" title="@SafeVarargs"></a>@SafeVarargs</h2><p>如果你认为你的方法或者构造方法是类型安全的，那么你也就可以使用@SafeVarargs 来跳过@SuppressWarnings(“unchecked”)检查。</p>
+<h1 id="注解的提取"><a href="#注解的提取" class="headerlink" title="注解的提取"></a>注解的提取</h1><p>注解通过反射提取</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">boolean</span> <span class="title">isAnnotationPresent</span><span class="params">(Class)</span> <span class="comment">//是否用了某个注解</span></span></span><br><span class="line"><span class="function">&lt;A extends Annotation&gt; A <span class="title">getAnnotation</span><span class="params">(Class)</span> <span class="comment">//获取某个注解类</span></span></span><br><span class="line"><span class="function">Annotation[] <span class="title">getAnnotations</span><span class="params">()</span> <span class="comment">//获取所有注解</span></span></span><br></pre></td></tr></table></figure>
+
+<p><strong>自己实现的注解默认不被编译器解析，请加上<code>@Retention(RetentionPolicy.RUNTIME)</code></strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.annotation.*;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyAnnotation &#123;</span><br><span class="line">    role[] value();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@Repeatable</span>(MyAnnotation<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">Retention</span>(<span class="title">RetentionPolicy</span>.<span class="title">RUNTIME</span>)</span></span><br><span class="line"><span class="class">@<span class="title">interface</span> <span class="title">role</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">value</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@role</span>(<span class="string">"富豪"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">father</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@role</span>(<span class="string">"画家"</span>)</span><br><span class="line"><span class="meta">@role</span>(<span class="string">"富二代"</span>)</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">son</span> <span class="keyword">extends</span> <span class="title">father</span> </span>&#123;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Annotation[] role = son<span class="class">.<span class="keyword">class</span>.<span class="title">getAnnotations</span>()</span>;</span><br><span class="line">        System.out.println(Arrays.toString(role));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// output</span></span><br><span class="line"><span class="comment">/* &gt;&gt;&gt;</span></span><br><span class="line"><span class="comment">[</span></span><br><span class="line"><span class="comment">	@ysoserial.test.role(value=富豪), </span></span><br><span class="line"><span class="comment">	@ysoserial.test.MyAnnotation(</span></span><br><span class="line"><span class="comment">		value=[</span></span><br><span class="line"><span class="comment">			@ysoserial.test.role(value=画家), </span></span><br><span class="line"><span class="comment">			@ysoserial.test.role(value=富二代)</span></span><br><span class="line"><span class="comment">		]</span></span><br><span class="line"><span class="comment">	)</span></span><br><span class="line"><span class="comment">]</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h1><p>给编译器或者APT用，或者说，取决于自己的想法</p>
+<ul>
+<li>将需要检查的方法打上<code>@check</code>，来进行检查</li>
+<li>利用注解做路由</li>
+<li>异步代码标记</li>
+</ul>
+<h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><p>下面是一个简单的url路由解析器和定义,文件不多，就5个。带师傅们当个乐就好，主要是去理解其中的含义</p>
+<p>RequestMethud.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> RouteTest.RouteRequest;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">enum</span> RequestMethod &#123;</span><br><span class="line">    GET,</span><br><span class="line">    POST</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Request.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> RouteTest.RouteRequest;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Repeatable;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Retention;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.RetentionPolicy;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Repeatable</span>(Requests<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">Retention</span>(<span class="title">RetentionPolicy</span>.<span class="title">RUNTIME</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> @<span class="title">interface</span> <span class="title">Request</span> </span>&#123;</span><br><span class="line">    <span class="function">String <span class="title">path</span><span class="params">()</span></span>;</span><br><span class="line">    RequestMethod[] method();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Requests.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> RouteTest.RouteRequest;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.Retention;</span><br><span class="line"><span class="keyword">import</span> java.lang.annotation.RetentionPolicy;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Requests &#123;</span><br><span class="line">    Request[] value();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Route.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> RouteTest.Route;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> RouteTest.RouteRequest.Request;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">static</span> RouteTest.RouteRequest.RequestMethod.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Route</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Request</span>(path=<span class="string">"/"</span>, method = GET)</span><br><span class="line">    <span class="meta">@Request</span>(path = <span class="string">"/index"</span>, method = &#123;GET, POST&#125;)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">index</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"index"</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Request</span>(path=<span class="string">"/test"</span>, method = POST)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">test</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"test"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Analysis.java</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> RouteTest.RouteAnalysis;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> RouteTest.Route.Route;</span><br><span class="line"><span class="keyword">import</span> RouteTest.RouteRequest.Request;</span><br><span class="line"><span class="keyword">import</span> RouteTest.RouteRequest.Requests;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Analysis</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> HashMap&lt;String, Method&gt; <span class="title">RouteAnalysis</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        HashMap&lt;String, Method&gt; urlMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        Route router = <span class="keyword">new</span> Route();</span><br><span class="line">        Method[] r = router.getClass().getDeclaredMethods();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Method m : r) &#123;</span><br><span class="line">            Request req = getRequest(m);</span><br><span class="line">            <span class="keyword">if</span> (req != <span class="keyword">null</span>) &#123;</span><br><span class="line">                urlMap.put(req.path(), m);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            Requests reqs = getRequests(m);</span><br><span class="line">            <span class="keyword">if</span> (reqs != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (Request reqFromReqs : reqs.value()) &#123;</span><br><span class="line">                    urlMap.put(reqFromReqs.path(), m);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> urlMap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Request <span class="title">getRequest</span><span class="params">(Method m)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> m.getAnnotation(Request<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> Requests <span class="title">getRequests</span><span class="params">(Method m)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> m.getAnnotation(Requests<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Analysis test = <span class="keyword">new</span> Analysis();</span><br><span class="line">        System.out.println(test.RouteAnalysis().get(<span class="string">"/index"</span>));</span><br><span class="line">        <span class="comment">// output public java.lang.Object RouteTest.Route.Route.index()</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>代码审计</tag>
+        <tag>java</tag>
+        <tag>开发</tag>
+        <tag>基础</tag>
+        <tag>注解</tag>
+      </tags>
+  </entry>
 </search>
