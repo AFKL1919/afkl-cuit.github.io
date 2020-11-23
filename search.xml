@@ -2088,4 +2088,64 @@ php:5.6-apache:
         <tag>注解</tag>
       </tags>
   </entry>
+  <entry>
+    <title>java反序列化--CommonsCollections1</title>
+    <url>/2020/11/22/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections1/</url>
+    <content><![CDATA[<h1 id="CommonsCollections1链"><a href="#CommonsCollections1链" class="headerlink" title="CommonsCollections1链"></a>CommonsCollections1链</h1><h1 id="终点"><a href="#终点" class="headerlink" title="终点"></a>终点</h1><p>这条链从终点开始讲可能简单一点。</p>
+<h2 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h2><p>一切的一切得从<code>Transformer</code>，这个接口讲起。这个接口仅有一个<code>Transformer</code>方法，作用是定义一个转换器，将换另一个对象。</p>
+<p>这里用到了<code>Tansformer</code>的三个实现</p>
+<ol>
+<li><code>InvokeTansformar</code>对输入的对象进行反射调用</li>
+<li><code>ConstantTansformer</code>原分原的返还对象</li>
+<li><code>ChainTansformar</code>进行<code>Tansformar</code>的链式调用</li>
+</ol>
+<p><img src="https://i.loli.net/2020/11/22/oBv9x1bpPlwsH2i.png" alt="图1-1"></p>
+<p>整个调用链的一个重要的地方是<code>ChainTansformar</code>的<code>Tansformar</code>方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">transform</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; iTransformers.length; i++) &#123;</span><br><span class="line">        object = iTransformers[i].transform(object);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> object;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>iTransformar</code>是一个数组，被指定为上图1-1的<code>transformars</code>变量。这样可以循环调用里面值的<code>Tansformar</code>方法。</p>
+<p>之后是<code>ConstantTransformar</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">transform</span><span class="params">(Object input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> iConstant;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>iConstant</code>是构造函数传入的对象</p>
+<p>最后是<code>InvokeTansformar</code>，可以对传入的对象进行反射操作</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">transform</span><span class="params">(Object input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (input == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        Class cls = input.getClass();</span><br><span class="line">        Method method = cls.getMethod(iMethodName, iParamTypes);</span><br><span class="line">        <span class="keyword">return</span> method.invoke(input, iArgs);</span><br><span class="line"></span><br><span class="line">    &#125; <span class="keyword">catch</span> (NoSuchMethodException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' does not exist"</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (IllegalAccessException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' cannot be accessed"</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (InvocationTargetException ex) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> FunctorException(<span class="string">"InvokerTransformer: The method '"</span> + iMethodName + <span class="string">"' on '"</span> + input.getClass() + <span class="string">"' threw an exception"</span>, ex);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整体看下来，<code>Transformar</code>的调用链如下</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[ConstantTransformar]--Runtime.class--&gt;[InvokeTransformar]--getMethod--&gt;[InvokeTransformar]--invoke--&gt;[InvokeTransformar]--exec--&gt;命令执行</span><br></pre></td></tr></table></figure>
+
+<h2 id="LazyMap"><a href="#LazyMap" class="headerlink" title="LazyMap"></a>LazyMap</h2><p>现在我们知道，我们的最终目的是调用<code>ChainTransformar</code>的<code>Tranformar</code>方法。向上推理，我们须要找到一个类的方法来调用<code>tranformar</code>。</p>
+<p>来看看yso的CC1链是怎么写的</p>
+<p><img src="https://i.loli.net/2020/11/23/k9jncFzYDqyuW8f.png" alt="image-20201123185431450"></p>
+<p>yso工具的CC链中，最常用的方法是<code>LazyMap</code>类中的<code>get</code>了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">get</span><span class="params">(Object key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (map.containsKey(key) == <span class="keyword">false</span>) &#123;</span><br><span class="line">        Object value = factory.transform(key);</span><br><span class="line">        map.put(key, value);</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> map.get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，只需要<code>map</code>属性不包含<code>key</code>变量的指即可调用<code>factory</code>属性的<code>transformar</code>方法。</p>
+<h2 id="动态代理调用"><a href="#动态代理调用" class="headerlink" title="动态代理调用"></a>动态代理调用</h2><p>好，现在跳板转到了<code>LazyMap</code>的<code>get</code>方法上。那么还是需要一个跳板或者<code>readObject</code>方法来调用这个<code>get</code>方法。</p>
+<p>yso在这里调用了两个静态方法</p>
+<p><img src="https://i.loli.net/2020/11/23/ZmFgkPN6HWd5OJn.png" alt="image-20201123185554512"></p>
+<p>跟入看一看</p>
+<p><img src="https://i.loli.net/2020/11/23/VcZ4OhAF7E6MUuX.png" alt="image-20201123185654423"></p>
+<p>emmm好像很复杂，我们来慢慢分析。</p>
+<p>首先从<code>createMemoitizedProxy</code>跟入<code>createMemoizedInvocationHandler</code>。可以看到其反射调用了某个类的第一个构造方法，并利用其实例化。<code>ANN_INV_HANDLER_CLASS</code>常量是一个类名字符串，即<code>sun.reflect.annotation.AnnotationInvocationHandler</code>(这个类是注解的实例化，这个涉及java注解类的底层，以后再讲，等不急的朋友可以看一看这个<a href="https://www.cnblogs.com/throwable/p/9747595.html。java注解的底层也是动态代理)。">https://www.cnblogs.com/throwable/p/9747595.html。java注解的底层也是动态代理)。</a></p>
+<p>为什么要用如此奇怪的方法来实例化这个类呢？其实看看源码就知道。</p>
+<p><img src="https://i.loli.net/2020/11/23/ZJYCESuMc7KB8h6.png" alt="image-20201123190550372"></p>
+<p>源码的文件名为<code>AnnotationInvocationHandler.java</code>，但其并不是一个<code>public</code>类，所以无法从外部实例化，想实例化，只能通过反射的方式。</p>
+<p>然后，我们继续跟入<code>createProxy</code>中。其新建了一个<code>Map</code>接口的动态代理对象，处理器为<code>AnnotationInvocationHandler</code>。这里不懂的话，可以先看看之前的文章。</p>
+<p>最后，他又将<code>Map</code>的动态代理对象通过反射调用构造函数，放入了<code>AnnotationInvocationHandler</code>。</p>
+<p><img src="https://i.loli.net/2020/11/23/rfGxWg7zDpV2KIS.png" alt="image-20201123195044624"></p>
+<p>然后，我们要序列化的类便是这个装载了<code>Map</code>动态代理的<code>AnnotationInvocationHandler</code>类</p>
+<h2 id="readObject"><a href="#readObject" class="headerlink" title="readObject"></a>readObject</h2><p><img src="https://i.loli.net/2020/11/23/esJMYg7xXpumPWn.png" alt="image-20201123195405114"></p>
+<p>上面是<code>AnnotationInvocationHandler</code>类的<code>readObject</code>方法。可以看到其首先通过<code>defaultReadObject</code>来获取属性。之后便开始处理这些属性。在其中会调用<code>this.memberValues.entrySet</code>，于是其触发了动态代理机制，去调用其<code>invoke</code>方法<strong>（PS:感觉像php的__call方法…）</strong>。</p>
+<p><img src="https://i.loli.net/2020/11/23/smFbkI6wTBt8YMl.png" alt="image-20201123200148865"></p>
+<p>上面代码最重要的其实是最后一句<code>this.memberValues.get()</code>。之前代码的大致意思是检查我们是否是想调用<code>hashCode</code>、<code>toString</code>之类的方法。但很明显，我们要调用<code>entrySet</code>方法，所以上面的代码几乎全部跳过，直接来到了最后一句。通过动态代理调用<code>get</code>方法。根据之前的赋值，这里会调用<code>LazyMap</code>的<code>get</code>方法，最终调用我们整个链。</p>
+<h2 id="调用栈"><a href="#调用栈" class="headerlink" title="调用栈"></a>调用栈</h2><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">3. Tranformar Chain</span><br><span class="line">2. LazyMap::get</span><br><span class="line">1. AnnotationInvocationHandler::invoke</span><br><span class="line">0. AnnotationInvocationHandler::readObject</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>代码审计</tag>
+        <tag>反序列化</tag>
+        <tag>java</tag>
+      </tags>
+  </entry>
 </search>

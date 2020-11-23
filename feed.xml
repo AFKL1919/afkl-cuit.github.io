@@ -6,7 +6,7 @@
   <link href="/feed.xml" rel="self"/>
   
   <link href="https://afkl-cuit.github.io/"/>
-  <updated>2020-11-22T06:29:51.201Z</updated>
+  <updated>2020-11-23T12:14:32.857Z</updated>
   <id>https://afkl-cuit.github.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>java反序列化--CommonsCollections1</title>
+    <link href="https://afkl-cuit.github.io/2020/11/22/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections1/"/>
+    <id>https://afkl-cuit.github.io/2020/11/22/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections1/</id>
+    <published>2020-11-22T07:18:35.000Z</published>
+    <updated>2020-11-23T12:14:32.857Z</updated>
+    
+    <summary type="html">
+    
+      了解了java的动态代理机制后，终于可以开始调这个链惹（
+    
+    </summary>
+    
+    
+    
+      <category term="代码审计" scheme="https://afkl-cuit.github.io/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    
+      <category term="反序列化" scheme="https://afkl-cuit.github.io/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="java" scheme="https://afkl-cuit.github.io/tags/java/"/>
+    
+  </entry>
   
   <entry>
     <title>java动态代理</title>
